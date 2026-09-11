@@ -1,0 +1,58 @@
+{
+  "_aciklama": "Haftalık güncellenecek tek dosya. Yeni emirname çıkınca karar, urunler ve gerekirse bugunkuKurallar bölümlerini; her gün de kayitlar listesini güncelle.",
+  "karar": {
+    "kaynakGazete": "10 Eylül 2026 tarihli Resmi Gazete (Sayı 169)",
+    "resmiFiyatTarihi": "2026-09-11",
+    "harcMuafiyetiSonGun": "2026-09-16",
+    "paketBitis": "2026-09-17",
+    "veriGuncelleme": "2026-09-11"
+  },
+  "urunler": {
+    "b95": {
+      "resmiIAF": 60.271186,
+      "resmiPompa": 71.12,
+      "resmiFif": 0.176095
+    },
+    "b98": {
+      "resmiIAF": 61.118644,
+      "resmiPompa": 72.12,
+      "resmiFif": 0.048643
+    },
+    "dz": {
+      "resmiIAF": 59.322034,
+      "resmiPompa": 70.0,
+      "resmiFif": 0,
+      "ekIsaret": null
+    }
+  },
+  "bugunkuKurallar": {
+    "aciklama": "Devlet neredeyse hiçbir şey almıyor: harçlar, turizm fonu ve KDV bu hafta askıda.",
+    "ayar": {
+      "tampon": true,
+      "rihtim": false,
+      "belediye": false,
+      "turizm": false,
+      "prim": false,
+      "kdv": false,
+      "gumruk": 0,
+      "fifMod": "resmi"
+    }
+  },
+  "kayitlar": [
+    {
+      "tarih": "2026-09-09",
+      "b95": 1492.6,
+      "brent": 101.21,
+      "kaynak": "başlangıç",
+      "not": "Benzin ve dizel: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı.",
+      "dz": 1351.3
+    },
+    {
+      "tarih": "2026-09-10",
+      "brent": 108.97,
+      "kur": 48.5,
+      "kaynak": "başlangıç",
+      "not": "Brent: 10 Eylül kapanışı."
+    }
+  ]
+}
