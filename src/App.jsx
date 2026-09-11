@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ALANLAR, farkHesapla, turet, gunlukBirlestir } from "./tahmin.js";
+import { SABIT, hesapla, ortukCif } from "./hesap.js";
+import yerlesikVeri from "../public/data/piyasa.json";
+import { piyasaDogrula, kktcBugun, tarihGecerli } from "./piyasa.js";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine,
   ResponsiveContainer, CartesianGrid,
@@ -42,48 +46,30 @@ const KALEM = {
 const KALEM_SIRA = ["urun", "tampon", "ithalatci", "nakliye", "bayi", "fif", "harc", "kdv"];
 
 /* ================================================================== */
-/*  Veri: 11 Eylül 2026 emirnamesi (RG 169, EK III, s. 4169–4170)       */
+/*  Ürün özellikleri; tarihli fiyatlar tek JSON dosyasından gelir      */
 /* ================================================================== */
 
 const URUNLER = {
   b95: {
     ad: "Benzin 95", kotasyon: "Prem Unl 10 ppm CIF Med", yogunluk: 0.775,
-    resmiIAF: 60.271186, resmiPompa: 71.12, oncekiPompa: 68.12,
-    resmiFif: 0.176095, turizmUsd: 0.01, dizel: false,
+    turizmUsd: 0.01, dizel: false,
   },
   b98: {
     ad: "Benzin 98", kotasyon: "Prem Unl 10 ppm CIF Med", yogunluk: 0.775,
-    resmiIAF: 61.118644, resmiPompa: 72.12, oncekiPompa: 69.12,
-    resmiFif: 0.048643, turizmUsd: 0.01, dizel: false,
+    turizmUsd: 0.01, dizel: false,
   },
   dz: {
     ad: "Euro Diesel", kotasyon: "10 ppm ULSD CIF Med", yogunluk: 0.845,
-    resmiIAF: 59.322034, resmiPompa: 70.0, oncekiPompa: 67.0,
-    resmiFif: 0, turizmUsd: 0.003, dizel: true,
-    ekIsaret: { etiket: "10 Eylül kapanışı", deger: 1492.82 },
+    turizmUsd: 0.003, dizel: true,
   },
 };
 
-const SABIT = {
-  tampon: 0.03,     // Tüzük md. 2: tavan = parite × 1,03 + ...
-  ithalatci: 0.04,  // md. 14(a)
-  bayi: 0.18,       // md. 14(b)
-  rihtim: 0.022,    // doğrulanmadı: MAGO verisinden türetildi
-  belediye: 0.015,  // Belediyeler Yasası md. 94(8); matrah doğrulanmadı
-  prim: 0.01,       // yalnız mazot, CIF üzerinden
-  kdv: 0.1,         // KDV açıldığında uygulanacak oran
-  eskiFif: 9.1179,  // kriz öncesi 95 FİF'i (MAGO)
-};
-const VARSAYILAN_KUR = 48.5;
 
-// Geçici kararların süreleri (RG 169, 10 Eylül 2026). Yeni karar çıkınca burası güncellenir.
-const KARAR = {
-  kaynakGazete: "10 Eylül 2026 tarihli Resmi Gazete (Sayı 169)",
-  resmiFiyatTarihi: "2026-09-11",
-  harcMuafiyetiSonGun: "2026-09-16", // rıhtım, gümrük, belediye, %1 prim (dahil)
-  paketBitis: "2026-09-17",          // KDV, turizm fonu ve haftalık fiyatlama tüzüğü bu tarihte kalkar
-};
-const VARSAYILAN_NAKLIYE = 0.064;
+let VARSAYILAN_KUR;
+let VARSAYILAN_NAKLIYE;
+let KARAR = {};
+let GUNCEL = {};
+let MODEL_ESKI = false;
 
 const KURALLAR = {
   bugun: {
@@ -107,62 +93,34 @@ const KURALLAR = {
 /*  Dış veri: yayındaki sürüm her hafta data/piyasa.json'dan günceller */
 /* ------------------------------------------------------------------ */
 
-let TABAN = null; // yayındaki ortak piyasa günlüğü; null ise yerleşik başlangıç verisi kullanılır
+let TABAN = [];
 
 export function veriUygula(veri) {
-  if (!veri || typeof veri !== "object") return;
-  if (veri.karar) Object.assign(KARAR, veri.karar);
-  for (const [k, v] of Object.entries(veri.urunler || {})) if (URUNLER[k]) Object.assign(URUNLER[k], v);
-  if (veri.bugunkuKurallar?.ayar) {
-    KURALLAR.bugun.ayar = { ...KURALLAR.bugun.ayar, ...veri.bugunkuKurallar.ayar };
-    if (veri.bugunkuKurallar.aciklama) KURALLAR.bugun.aciklama = veri.bugunkuKurallar.aciklama;
+  piyasaDogrula(veri); // doğrulama bitmeden hiçbir ortak değer değişmez
+  KARAR = { ...veri.karar };
+  GUNCEL = veri.guncelFiyatlar;
+  MODEL_ESKI = GUNCEL.tarih !== KARAR.resmiFiyatTarihi || Object.keys(URUNLER).some(k => veri.urunler[k].resmiPompa !== GUNCEL.urunler[k].resmiPompa);
+  VARSAYILAN_KUR = veri.varsayim.kur;
+  VARSAYILAN_NAKLIYE = veri.varsayim.nakliye;
+  for (const k of Object.keys(URUNLER)) {
+    Object.assign(URUNLER[k], {
+      resmiIAF: veri.urunler[k].resmiIAF,
+      resmiFif: veri.urunler[k].resmiFif,
+      resmiPompa: GUNCEL.urunler[k].resmiPompa,
+    });
   }
-  if (Array.isArray(veri.kayitlar)) TABAN = veri.kayitlar;
+  KURALLAR.bugun.ayar = { ...veri.bugunkuKurallar.ayar };
+  KURALLAR.bugun.aciklama = veri.bugunkuKurallar.aciklama;
+  KURALLAR.bugun.ad = MODEL_ESKI ? "Modeldeki kurallar" : "Bugünkü kurallar";
+  TABAN = veri.kayitlar;
 }
+veriUygula(yerlesikVeri);
 
 /* ================================================================== */
 /*  Hesap motoru (önceki sürümle aynı, doğrulandı)                      */
 /* ================================================================== */
 
-function fifDegeri(u, r) {
-  if (r.fifMod === "resmi") return u.resmiFif;
-  if (r.fifMod === "eski") return SABIT.eskiFif;
-  return Number(r.fifOzel) || 0;
-}
 
-function hesapla(u, cif, kur, r, nakliye) {
-  const P = ((cif * u.yogunluk) / 1000) * kur;
-  const tampon = r.tampon ? P * SABIT.tampon : 0;
-  const ithalatci = P * SABIT.ithalatci;
-  const rihtim = r.rihtim ? P * SABIT.rihtim : 0;
-  const gumruk = P * ((Number(r.gumruk) || 0) / 100);
-  const prim = r.prim && u.dizel ? P * SABIT.prim : 0;
-  const turizm = r.turizm ? u.turizmUsd * kur : 0;
-  const fif = fifDegeri(u, r);
-  const ara = P + tampon + ithalatci + rihtim + gumruk + prim + turizm + nakliye + fif;
-  const belediye = r.belediye ? (ara * SABIT.belediye) / (1 - SABIT.belediye) : 0;
-  const iaf = ara + belediye;
-  const bayi = iaf * SABIT.bayi;
-  const kdv = r.kdv ? (iaf + bayi) * SABIT.kdv : 0;
-  const pompa = iaf + bayi + kdv;
-  const k = { urun: P, tampon, ithalatci, nakliye, bayi, fif, harc: rihtim + gumruk + prim + turizm + belediye, kdv };
-  const g = {
-    dunya: k.urun,
-    sirket: k.tampon + k.ithalatci + k.nakliye,
-    bayi: k.bayi,
-    devlet: k.fif + k.harc + k.kdv,
-  };
-  return { pompa, iaf, kalemler: k, gruplar: g };
-}
-
-function ortukCif(u, kur, r, nakliye) {
-  const b = r.belediye ? SABIT.belediye : 0;
-  const A = 1 + (r.tampon ? SABIT.tampon : 0) + SABIT.ithalatci + (r.rihtim ? SABIT.rihtim : 0)
-    + (Number(r.gumruk) || 0) / 100 + (r.prim && u.dizel ? SABIT.prim : 0);
-  const sabitler = nakliye + (r.turizm ? u.turizmUsd * kur : 0) + fifDegeri(u, r);
-  const P = (u.resmiIAF * (1 - b) - sabitler) / A;
-  return P / ((u.yogunluk / 1000) * kur);
-}
 
 /* ================================================================== */
 /*  Biçim yardımcıları                                                  */
@@ -170,7 +128,7 @@ function ortukCif(u, kur, r, nakliye) {
 
 const tl = (v, d = 2) => v.toLocaleString("tr-TR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const isaretli = (v, d = 2) => (v >= 0 ? "+" : "−") + tl(Math.abs(v), d);
-// "1.492,82", "1492,82", "1492.82" ve "1.492" kabul edilir; "123abc" reddedilir.
+// Türkçe ve noktalı ondalık biçimler kabul edilir; "123abc" reddedilir.
 const sayiOku = (s) => {
   let t = String(s ?? "").trim().replace(/\s/g, "");
   if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
@@ -186,7 +144,7 @@ const baslangicCif = () => Object.fromEntries(
 /*  Uygulama                                                            */
 /* ================================================================== */
 
-export default function App() {
+export default function App({ veriDurumu = {} }) {
   const [urunKey, setUrunKey] = useState("b95");
   const [cifler, setCifler] = useState(baslangicCif);
   const [kur, setKur] = useState(VARSAYILAN_KUR);
@@ -286,13 +244,42 @@ export default function App() {
             KKTC'de akaryakıt fiyatını devlet her hafta bir formülle belirliyor. Aşağıda o formülün içini görebilir,
             dünya fiyatını, doları ya da devletin aldığı payı değiştirip fiyatın nasıl tepki verdiğini deneyebilirsin.
           </p>
-          <p className="mt-3 text-sm" style={{ color: T.mute }}>
-            {gunFarki(bugunIso(), KARAR.resmiFiyatTarihi) > 7
-              ? `Gösterilen resmi fiyatlar ${trTarihYil(KARAR.resmiFiyatTarihi)} tarihli. Daha yeni bir fiyat kararı yayımlanmış olabilir; uygulama güncellenene kadar sonuçları buna göre değerlendir.`
-              : `Resmi fiyatlar ${trTarihYil(KARAR.resmiFiyatTarihi)} tarihinden geçerli.`}
-            {KARAR.veriGuncelleme ? ` Piyasa verisi son güncelleme: ${trTarihYil(KARAR.veriGuncelleme)}.` : ""}
-          </p>
         </header>
+
+        <section aria-label="Son resmî akaryakıt fiyatları" className="mt-6 rounded-2xl border p-5 sm:p-6" style={{ background: T.yuzey, borderColor: T.cizgi }}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold">Son resmî akaryakıt fiyatları</h2>
+              <p className="mt-1 text-sm" style={{ color: T.mute }}>{trTarihYil(GUNCEL.tarih)} tarihinden geçerli · TL/litre</p>
+            </div>
+            <button onClick={veriDurumu.yenile} disabled={veriDurumu.yukleniyor} className="rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: T.cizgi }}>
+              {veriDurumu.yukleniyor ? "Kontrol ediliyor…" : "Yayımlanan fiyatları yenile"}
+            </button>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {Object.entries(URUNLER).map(([key, urun]) => (
+              <div key={key} className="rounded-xl p-3 sm:p-4" style={{ background: T.bg }}>
+                <div className="text-sm font-medium">{urun.ad}</div>
+                <div className="mt-1 text-2xl font-bold sm:text-3xl">{tl(urun.resmiPompa)} <span className="text-sm font-normal">TL</span></div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-sm" style={{ color: T.mute }}>
+            <a className="underline" href={`${GUNCEL.kaynak.url}${GUNCEL.kaynak.sayfa ? `#page=${GUNCEL.kaynak.sayfa}` : ""}`} target="_blank" rel="noreferrer">{GUNCEL.kaynak.ad}{GUNCEL.kaynak.gazeteNo ? `, sayı ${GUNCEL.kaynak.gazeteNo}` : ""}</a>
+            {GUNCEL.kontrolZamani && ` · Kaynak kontrolü: ${new Date(GUNCEL.kontrolZamani).toLocaleString("tr-TR", { timeZone: "Asia/Nicosia" })} (KKTC saati)`}
+          </p>
+          <p className="mt-2 text-sm" role="status" aria-live="polite" style={{ color: veriDurumu.hata ? T.artis : T.mute }}>
+            {veriDurumu.hata || veriDurumu.mesaj || "Yayımlanan veriler açılışta ve sayfa açıkken 15 dakikada bir kontrol edilir."}
+          </p>
+          {(!GUNCEL.kontrolZamani || gunFarki(bugunIso(), kktcBugun(new Date(GUNCEL.kontrolZamani))) > 2) &&
+            <p className="mt-3 rounded-lg p-3 text-sm" style={{ background: "#FBF0D5", color: "#6B4A00" }}>Kaynak yakın zamanda otomatik doğrulanmadı. Gösterilen tarihli fiyatları kaynak bağlantısından kontrol edebilirsin.</p>}
+        </section>
+
+        {(MODEL_ESKI || bugunIso() > KARAR.harcMuafiyetiSonGun || bugunIso() >= KARAR.paketBitis) &&
+          <p className="mt-4 rounded-lg p-4 text-sm" role="status" style={{ background: "#FBF0D5", color: "#6B4A00" }}>
+            Pompa fiyatlarının tarihi {trTarihYil(GUNCEL.tarih)}; aşağıdaki hesap modelinin tarihi {trTarihYil(KARAR.resmiFiyatTarihi)}.
+            Modelin fiyat veya muafiyet bilgileri yeniden doğrulanmalı. Döküm ve zam radarı bu modelin varsayımlarıyla çalışır.
+          </p>}
 
         {/* ---------------- Zam radarı ---------------- */}
         <ZamRadari nakliye={nakliye} onIncele={(k, c, kr) => {
@@ -352,7 +339,7 @@ export default function App() {
                 <button onClick={bugunlereDon} disabled={bugunde && kuralKey === "bugun"}
                   className="rounded-lg px-4 py-2 text-sm font-medium"
                   style={{ border: `1px solid ${T.cizgi}`, background: T.bg, opacity: bugunde && kuralKey === "bugun" ? 0.5 : 1 }}>
-                  Bugünkü değerlere dön
+                  Model başlangıcına dön
                 </button>
                 <button onClick={kopyala} className="rounded-lg px-4 py-2 text-sm font-medium" style={{ background: T.vurgu, color: "#fff" }}>
                   {kopyalandi ? "Kopyalandı" : "Sonucu kopyala"}
@@ -373,12 +360,10 @@ export default function App() {
               <Kaydirici min={600} max={2000} step={1} deger={cif} onChange={cifAyarla} birim="$/ton" ondalik={0}
                 etiket="Dünya fiyatı, dolar/ton"
                 isaretler={[
-                  { deger: bugunCif, etiket: "Bugünkü fiyatın dayandığı seviye" },
-                  ...(u.ekIsaret ? [{ deger: u.ekIsaret.deger, etiket: u.ekIsaret.etiket }] : []),
+                  { deger: bugunCif, etiket: "Modelin referans seviyesi" },
                 ]} />
               <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                <HizliButon onClick={() => cifAyarla(Math.round(bugunCif * 10) / 10)}>Bugünkü seviye ({tl(bugunCif, 0)})</HizliButon>
-                {u.ekIsaret && <HizliButon onClick={() => cifAyarla(u.ekIsaret.deger)}>{u.ekIsaret.etiket} ({tl(u.ekIsaret.deger, 0)})</HizliButon>}
+                <HizliButon onClick={() => cifAyarla(Math.round(bugunCif * 10) / 10)}>Model seviyesi ({tl(bugunCif, 0)})</HizliButon>
                 <HizliButon onClick={() => cifAyarla(Math.round(cif + 100))}>+100 $</HizliButon>
                 <HizliButon onClick={() => cifAyarla(Math.max(600, Math.round(cif - 100)))}>−100 $</HizliButon>
               </div>
@@ -505,7 +490,7 @@ export default function App() {
                   {["Cuma", "Pazartesi", "Salı", "Çarşamba"].map((gun, i) => (
                     <label key={gun} className="text-sm">
                       <span style={{ color: T.mute }}>{gun}</span>
-                      <input type="text" inputMode="decimal" placeholder="1.492,82" value={gunluk[i]}
+                      <input type="text" inputMode="decimal" placeholder="1.500,00" value={gunluk[i]}
                         onChange={(e) => { const y = [...gunluk]; y[i] = e.target.value; setGunluk(y); }}
                         className="mt-1 w-full rounded-lg px-3 py-2 text-right" style={{ border: `1px solid ${T.cizgi}` }} />
                     </label>
@@ -611,7 +596,7 @@ export default function App() {
         <span className="text-sm" style={{ color: "#B9C6CD" }}>{u.ad}</span>
         <span className="text-xl font-bold">{tl(sonuc.pompa)} TL</span>
         <span className="text-sm font-semibold" style={{ color: bugunde ? "#B9C6CD" : fark > 0 ? "#F4A98F" : "#9FD6B2" }}>
-          {bugunde ? "bugünkü fiyat" : `${isaretli(fark)} TL`}
+          {Math.abs(fark) < 0.005 ? "resmî fiyatla aynı" : `${isaretli(fark)} TL`}
         </span>
       </div>}
     </div>
@@ -622,8 +607,8 @@ export default function App() {
 /*  Alt bileşenler                                                      */
 /* ================================================================== */
 
-function FarkEtiketi({ fark, resmi, bugunde }) {
-  if (bugunde) {
+function FarkEtiketi({ fark, resmi }) {
+  if (Math.abs(fark) < 0.005) {
     return <p className="mt-3 text-base" style={{ color: T.mute }}>Bugünkü resmi fiyatla aynı.</p>;
   }
   const yukari = fark > 0;
@@ -725,30 +710,19 @@ function Rozet({ sade }) {
 /* ================================================================== */
 
 const DEPO_ANAHTAR = "akaryakit-yerel-v2"; // yalnız kullanıcının kendi girdiği değerler
-const VARIL_TON = { benzin: 1000 / 0.775 / 158.987, dizel: 1000 / 0.845 / 158.987 }; // varil/ton
+
 const prim98 = () => ortukCif(URUNLER.b98, VARSAYILAN_KUR, KURALLAR.bugun.ayar, VARSAYILAN_NAKLIYE)
   - ortukCif(URUNLER.b95, VARSAYILAN_KUR, KURALLAR.bugun.ayar, VARSAYILAN_NAKLIYE);
-
-const TOHUM = [
-  {
-    id: "tohum-1", tarih: "2026-09-09", b95: 1492.6, brent: 101.21, kaynak: "başlangıç",
-    not: "Benzin: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı.",
-  },
-  {
-    id: "tohum-2", tarih: "2026-09-10", dz: 1492.82, brent: 108.97, kur: 48.5, kaynak: "başlangıç",
-    not: "Dizel: Med 10 CIF grafiği, 10 Eylül. Brent: 10 Eylül kapanışı.",
-  },
-];
 
 const isoGun = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const trTarih = (d) => d.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
 const isodanTarih = (s) => { const [y, m, g] = s.split("-").map(Number); return new Date(y, m - 1, g); };
-const bugunIso = () => isoGun(new Date());
+const bugunIso = kktcBugun;
 const trTarihYil = (iso) => isodanTarih(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 function gunFarki(a, b) { return Math.round((isodanTarih(a) - isodanTarih(b)) / 86400000); }
 
 // Tüzük geçici maddesi: Cuma'dan sonraki Çarşamba'ya kadar olan iş günlerinin ortalaması
-function aktifPencere(simdi = new Date()) {
+function aktifPencere(simdi = isodanTarih(bugunIso())) {
   const d = new Date(simdi.getFullYear(), simdi.getMonth(), simdi.getDate());
   const cumadanBeri = (d.getDay() - 5 + 7) % 7;
   const bas = new Date(d); bas.setDate(d.getDate() - cumadanBeri);
@@ -760,39 +734,14 @@ function aktifPencere(simdi = new Date()) {
 
 // Vekil ile CIF Med arasındaki farkı, ikisinin de girildiği son günlerden hesapla.
 // Önce hedef tarihten önceki/aynı günler kullanılır; hiç yoksa elde olan tüm çiftler.
-const KALIBRASYON_GUN = 5;
-function farkHesapla(sirali, hedef, vekil, tarih) {
-  const ciftler = sirali.filter((k) => typeof k[hedef] === "number" && typeof k[vekil] === "number");
-  if (!ciftler.length) return null;
-  const once = ciftler.filter((k) => k.tarih <= tarih);
-  const kume = (once.length ? once : ciftler).slice(-KALIBRASYON_GUN);
-  return { fark: kume.reduce((a, k) => a + (k[hedef] - k[vekil]), 0) / kume.length, gun: kume.length, son: kume[kume.length - 1].tarih };
-}
+
+
 
 // Doğrudan CIF yoksa sırayla: vekil + kalibre fark (benzinde Eurobob, dizelde gasoil),
 // o da yoksa en yakın önceki kayıttan Brent değişimi.
-function turet(kayitlar) {
-  const sirali = [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih));
-  let capaB = null, capaDB = null;
-  return sirali.map((k) => {
-    const r = { ...k, tahmini: [], yontem: {} };
-    if (k.b95 == null) {
-      const f = k.eurobob != null ? farkHesapla(sirali, "b95", "eurobob", k.tarih) : null;
-      if (f) { r.b95 = k.eurobob + f.fark; r.tahmini.push("b95"); r.yontem.b95 = "eurobob"; }
-      else if (k.brent != null && capaB) { r.b95 = capaB.b95 + (k.brent - capaB.brent) * VARIL_TON.benzin; r.tahmini.push("b95"); r.yontem.b95 = "brent"; }
-    }
-    if (k.dz == null) {
-      const f = k.gasoil != null ? farkHesapla(sirali, "dz", "gasoil", k.tarih) : null;
-      if (f) { r.dz = k.gasoil + f.fark; r.tahmini.push("dz"); r.yontem.dz = "gasoil"; }
-      else if (k.brent != null && capaDB) { r.dz = capaDB.dz + (k.brent - capaDB.brent) * VARIL_TON.dizel; r.tahmini.push("dz"); r.yontem.dz = "brent"; }
-    }
-    if (k.b95 != null && k.brent != null) capaB = { b95: k.b95, brent: k.brent };
-    if (k.dz != null && k.brent != null) capaDB = { dz: k.dz, brent: k.brent };
-    return r;
-  });
-}
 
-const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", brent: "Brent değişiminden" };
+
+const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", brent: "Brent değişiminden", model: "resmî fiyattan geriye hesapla" };
 function yontemMetni(yontemler) {
   const say = {};
   for (const y of yontemler) say[y] = (say[y] || 0) + 1;
@@ -840,23 +789,8 @@ function durum(fark, guven) {
 }
 
 // Aynı güne ait kayıtları tek satırda birleştir: sonra girilen dolu alan öncekinin yerine geçer.
-const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "brent", "kur"];
-function gunlukBirlestir(kayitlar) {
-  const gunler = new Map();
-  for (const k of kayitlar) {
-    if (!k || !/^\d{4}-\d{2}-\d{2}$/.test(k.tarih || "")) continue;
-    const onceki = gunler.get(k.tarih) || { id: `gun-${k.tarih}`, tarih: k.tarih, kaynaklar: [], kaynakTurleri: [], notlar: [] };
-    const yeni = { ...onceki };
-    for (const a of ALANLAR) if (typeof k[a] === "number" && Number.isFinite(k[a])) yeni[a] = k[a];
-    const tur = k.kaynak || (k.kaynakTurleri || []).join(", ");
-    if (tur && !yeni.kaynakTurleri.includes(tur)) yeni.kaynakTurleri = [...yeni.kaynakTurleri, tur];
-    yeni.kaynaklar = [...yeni.kaynaklar, ...(k.kaynaklar || [])].filter((x, i, d) => x?.url && d.findIndex((y) => y.url === x.url) === i);
-    const not = k.not || (k.notlar || []).join(" ");
-    if (not) yeni.notlar = [...yeni.notlar, not];
-    gunler.set(k.tarih, yeni);
-  }
-  return [...gunler.values()].sort((a, b) => a.tarih.localeCompare(b.tarih));
-}
+
+
 
 // Depolama tek yerde: Claude içinde window.storage; bağımsız bir PWA'da burası IndexedDB ile değiştirilir.
 // Yayındaki sürüm: Claude içinde window.storage, tarayıcıda localStorage kullanılır.
@@ -887,7 +821,7 @@ const ESKI_VERI_GUN = 10;
 
 function ZamRadari({ nakliye, onIncele }) {
   const [yerel, setYerel] = useState([]);
-  const kayitlar = useMemo(() => gunlukBirlestir([...(TABAN || TOHUM), ...yerel]), [yerel]);
+  const kayitlar = useMemo(() => gunlukBirlestir([...TABAN, ...yerel]), [yerel]);
   const yerelTarihler = useMemo(() => new Set(yerel.map((x) => x.tarih)), [yerel]);
   const [yuklendi, setYuklendi] = useState(false);
   const [kalici, setKalici] = useState(true);
@@ -934,7 +868,7 @@ function ZamRadari({ nakliye, onIncele }) {
       const kurOrt = kurlar.reduce((a, b) => a + b, 0) / kurlar.length;
       const yontemler = icte.filter((k) => k.tahmini.includes(alan)).map((k) => k.yontem[alan]);
       const dogrudan = icte.length - yontemler.length;
-      const kalibre = yontemler.filter((y) => y !== "brent").length;
+      const kalibre = yontemler.filter((y) => y === "eurobob" || y === "gasoil").length;
       const guven = dogrudan >= 3 ? "yuksek" : dogrudan >= 1 || kalibre >= 2 ? "orta" : "dusuk";
       return { cif: tlOrt / kurOrt, kur: kurOrt, gun: icte.length, yontemler, kaynak: "pencere", guven };
     }
@@ -961,7 +895,7 @@ function ZamRadari({ nakliye, onIncele }) {
   const siraliKayit = useMemo(() => [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih)), [kayitlar]);
   const farkBenzin = farkHesapla(siraliKayit, "b95", "eurobob", bugun);
   const farkDizel = farkHesapla(siraliKayit, "dz", "gasoil", bugun);
-  const paketBitti = bugun > KARAR.paketBitis;
+  const paketBitti = bugun >= KARAR.paketBitis || bugun > KARAR.harcMuafiyetiSonGun;
   const paketBitiyor = !paketBitti && gunFarki(KARAR.paketBitis, bugun) <= 3;
 
   async function internettenGetir() {
@@ -1015,13 +949,14 @@ Respond with ONLY this JSON object, no markdown, no commentary:
   }
 
   function formuKaydet() {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.tarih)) return setFormHata("Bir tarih seç.");
+    if (!tarihGecerli(form.tarih)) return setFormHata("Geçerli bir tarih seç.");
     if (form.tarih > bugun) return setFormHata("Gelecek tarihli değer girilemez.");
     const hatali = ALANLAR.filter((a) => String(form[a]).trim() !== "" && !Number.isFinite(sayiOku(form[a])));
-    if (hatali.length) return setFormHata("Sayı olarak okunamayan alan var. Örnek biçim: 1.492,82");
+    if (hatali.length) return setFormHata("Sayı olarak okunamayan alan var. Örnek biçim: 1.500,00");
     const s = (x) => { const v = sayiOku(x); return Number.isFinite(v) ? v : null; };
     const k = { tarih: form.tarih, ...Object.fromEntries(ALANLAR.map((a) => [a, s(form[a])])), kaynak: "elle", not: form.not };
     if (ALANLAR.every((a) => k[a] == null)) return setFormHata("En az bir değer gir.");
+    if (ALANLAR.some((a) => k[a] != null && (k[a] < ARALIK[a][0] || k[a] > ARALIK[a][1]))) return setFormHata("Değerlerden biri izin verilen aralık dışında. Birimleri kontrol et.");
     setFormHata(""); yerelKaydet([...yerel, k]); setForm(null);
   }
 

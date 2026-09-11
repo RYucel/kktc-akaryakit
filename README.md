@@ -1,76 +1,117 @@
-# KKTC akaryakıt fiyatı nasıl oluşuyor?
+﻿# KKTC akaryakıt fiyatları ve hesaplayıcı
 
-Pompada ödenen paranın nereye gittiğini gösteren, dünya fiyatı, dolar kuru ve vergi kurallarına göre fiyatın nasıl
-değiştiğini deneten ve gelecek haftanın fiyatını koşullu olarak tahmin eden açık kaynaklı bir web uygulaması.
+[Uygulamayı aç](https://ryucel.github.io/kktc-akaryakit/) · [Fiyat güncelleme ekranı](https://github.com/RYucel/kktc-akaryakit/actions/workflows/update-prices.yml)
 
-Hesap, *2001 Petrol Ürünlerinin Fiyatlandırma Esaslarını Düzenleyen Tüzük* (madde 2, 4, 8, 14) ile Resmi Gazete'de
-yayımlanan haftalık kararlara dayanır. Resmi bir hesap cetveli değildir.
+Benzin 95, Benzin 98 ve Euro Diesel için son resmî pompa fiyatlarını gösteren React/Vite uygulaması. Fiyat dökümü, kur/vergi senaryoları ve piyasa günlüğüne dayanan koşullu zam radarı da içerir.
 
-## Yayına alma (bir kez)
+## Otomatik güncelleme
 
-1. GitHub'da herkese açık yeni bir depo aç (örneğin `kktc-akaryakit`).
-2. Bu klasördeki dosyaları depoya gönder:
-   ```bash
-   git init
-   git add .
-   git commit -m "İlk sürüm"
-   git branch -M main
-   git remote add origin https://github.com/KULLANICI/kktc-akaryakit.git
-   git push -u origin main
-   ```
-3. Depoda **Settings → Pages → Build and deployment → Source** alanını **GitHub Actions** yap.
-4. **Actions** sekmesinde "GitHub Pages'e yayınla" iş akışının bitmesini bekle (1–2 dakika).
-   Site şu adreste açılır: `https://KULLANICI.github.io/kktc-akaryakit/`
+**Akaryakıt fiyatlarını güncelle** iş akışı [KKTC Resmî Gazete](https://basimevi.gov.ct.tr/) kaynağını **her gün UTC 00:17, 06:17, 12:17, 18:17 ve 21:17'de** kontrol eder. Haftalık değişikliklerin yanında ara kararlar da yakalanır. GitHub işleri geciktirebilir; bunlar kesin çalışma saatleri değildir.
 
-Sonraki her `main` gönderiminde site kendiliğinden yeniden yayınlanır.
+1. Dizin sayfasından tarihli akaryakıt azami satış emirnamelerini bulur.
+2. PDF cetvelinden üç ürünün perakende/ithalatçı fiyatlarını ve yürürlük tarihini okur.
+3. KKTC takvimine göre henüz yürürlüğe girmeyen fiyatı uygulamaz. Eski tarih, eksik ürün, hatalı sayı, belirsiz cetvel veya bağlantı hatasında dosyayı değiştirmeden durur.
+4. Doğrulanan sonucu `public/data/piyasa.json` dosyasının `guncelFiyatlar` alanına yazar ve commit eder. Fiyat değişmese de başarılı kaynak kontrolünün zamanı kaydedilir.
+5. Yayın işini ayrıca çağırır; GitHub'ın kendi token'ıyla yapılan push yeni bir push iş akışı başlatmaz.
 
-## Haftalık güncelleme
+Site verileri açılışta, sekme tekrar görünür olduğunda ve açık sekmede 15 dakikada bir alır. **Yayımlanan fiyatları yenile** düğmesi de aynı işi yapar; Resmî Gazete taramasını başlatmaz. Taramayı hemen çalıştırmak için Actions'tan otomatik işi elle başlat.
 
-Kod değiştirmeye gerek yok. Yalnızca `public/data/piyasa.json` dosyası güncellenir; GitHub'ın web düzenleyicisinden
-de yapılabilir. Kaydedip commit edince site bir iki dakika içinde güncellenir.
+Yalnız kontrol zamanı değişirse mevcut senaryo korunur; fiyat/model değişirse hesap başlangıcına dönülür. Veri alınamazsa son geçerli veri ve hata mesajı gösterilir. Kaynak iki günden uzun süredir kontrol edilmediyse uyarı görünür.
 
-| Alan | Ne zaman değişir | Kaynak |
-|---|---|---|
-| `karar.resmiFiyatTarihi`, `karar.kaynakGazete` | Yeni azami fiyat emirnamesi çıkınca | Resmi Gazete, EK III |
-| `urunler.*.resmiIAF`, `resmiPompa` | Aynı emirnameyle | "Mal ve Hizmetler ... Azami Satış Fiyatları Emirnamesi" cetveli |
-| `urunler.*.resmiFif` | FİF emirnamesi değişince | "Fiyat İstikrar Fonu ... Emirnamesi" |
-| `karar.harcMuafiyetiSonGun`, `karar.paketBitis` | Muafiyet kararları yenilenince | Bakanlar Kurulu kararları, KDV ve turizm fonu tüzük/emirnameleri |
-| `bugunkuKurallar.ayar` | Hangi vergi ve harcın alındığı değişince | Aynı kararlar |
-| `kayitlar` | Her iş günü | Aşağıdaki not |
-| `karar.veriGuncelleme` | Dosyayı her güncellediğinde | — |
+### GitHub'da ilk kurulum
 
-`bugunkuKurallar.ayar` içindeki anahtarlar: `rihtim`, `belediye`, `turizm`, `prim` (dizelde %1), `kdv` için `true`
-(alınıyor) ya da `false` (alınmıyor); `gumruk` yüzde olarak; `fifMod` için `"resmi"`.
+- Kod ve `.github/workflows/` dosyaları `main` dalında olmalı.
+- **Settings → Pages → Source: GitHub Actions** olmalı.
+- Actions çalıştırma ve iş akışının `contents: write` yetkisiyle `main` dalına commit yapmasına izin verilmeli. Dal koruması engelliyorsa mevcut korumaları incele; iş akışı zorla push yapmaz.
+- **Actions → Akaryakıt fiyatlarını güncelle → Run workflow → otomatik** ile ilk çalışmayı başlat.
+- API anahtarı veya ücretli piyasa verisi aboneliği gerekmez. Python paketleri iş akışında kurulur.
+- GitHub uzun süre etkinlik olmayan herkese açık depolarda zamanlamayı durdurabilir. Actions durumunu takip et. Dosyaların yalnız yerelde olması otomasyonu çalıştırmaz.
 
-Bir günlük kayıt örneği:
+## Manuel güncelleme
+
+**Actions → Akaryakıt fiyatlarını güncelle → Run workflow** ekranında:
+
+1. Dal: `main`, yöntem: `manuel`.
+2. Yürürlük tarihi: `YYYY-MM-DD`.
+3. 95 oktan, 98 oktan ve Euro Diesel fiyatlarını TL/litre olarak gir; `71,12` veya `71.12` kabul edilir.
+4. Kaynak bağlantısını ve kaynağın yayın tarihini gir.
+5. **Run workflow** düğmesine bas. Üç fiyat birlikte doğrulanır, kaydedilir ve site yayımlanır.
+
+Gelecek tarihli fiyatı ancak yürürlüğe girdiği gün girebilirsin. Hata ayrıntıları Actions çalışmasında görünür.
+Tarayıcıdaki **Değer ekle** formu kişisel piyasa günlüğüdür; ortak resmî pompa fiyatlarını değiştirmez.
+
+### Yerelden manuel güncelleme
+
+Bir `fiyatlar.json` dosyası oluştur. Aşağıdaki fiyatlar tarihli bir örnektir:
 
 ```json
-{ "tarih": "2026-09-14", "eurobob": 1450, "gasoil": 1440.5, "brent": 104.2, "kur": 48.6, "kaynak": "elle" }
+{
+  "tarih": "2026-09-11",
+  "kaynak": {
+    "ad": "KKTC Resmî Gazete",
+    "url": "https://basimevi.gov.ct.tr/Portals/6/2026/169.pdf",
+    "yayinTarihi": "2026-09-10"
+  },
+  "urunler": {
+    "b95": { "resmiPompa": 71.12 },
+    "b98": { "resmiPompa": 72.12 },
+    "dz": { "resmiPompa": 70.00 }
+  }
+}
 ```
 
-Alanlar: `b95` ve `dz` (benzin ve dizel CIF Med, $/ton), `eurobob` ve `gasoil` (vadeli, $/ton), `brent` ($/varil),
-`kur` (TL). Bilinmeyen alanı yazma. CIF Med yoksa uygulama benzini Eurobob'dan, dizeli gasoil'den tahmin eder.
-Bunun için en az bir gün CIF Med ile vekil değerin birlikte bulunması gerekir; o gün için yalnızca resmi fiyattan
-geri hesaplanan ortalamayı kullanabilirsin.
+```bash
+npm run prices:manual -- fiyatlar.json
+npm run build
+```
 
-## Veri lisansı uyarısı
+Ardından `public/data/piyasa.json` değişikliğini commit edip `main` dalına gönder. JSON'u doğrudan GitHub düzenleyicisinden de değiştirebilirsin; yayın öncesi aynı doğrulama çalışır.
 
-Platts, Argus ve borsa (ICE, CME) fiyatlarının herkese açık olarak yeniden yayımlanması genellikle lisans gerektirir.
-`kayitlar` içindeki her değer bu depoda ve sitede herkes tarafından görülebilir. Lisansın yoksa Platts kotasyonlarını
-bu dosyaya yazma; resmi fiyattan geri hesaplanan değerleri ve serbestçe yayımlanan göstergeleri (Brent, kur) kullan.
-Kullanıcıların sitede kendi girdiği değerler yalnızca kendi tarayıcılarında saklanır ve kimseyle paylaşılmaz.
+## Pompa fiyatı ile hesap modelinin farkı
 
-## Yerelde çalıştırma
+**Otomasyon pompa fiyatını günceller; vergi mevzuatını yorumlamaz.** `guncelFiyatlar` son emirnameyi, `karar`, `urunler`, `bugunkuKurallar` ve `varsayim` hesap modelinin son elle doğrulanan sürümünü tutar.
+
+Pompa fiyatı değişip model yenilenmediyse uygulama uyarı gösterir. Döküm ve radar eski varsayımlara bağlı kalır; yeni İAF eski fonlarla sessizce birleştirilmez.
+
+Modeli haftalık kararlarla birlikte yenilemek için:
+
+| Alan | İçerik |
+| --- | --- |
+| `karar.resmiFiyatTarihi`, `kaynakGazete` | Model cetvelinin tarihi ve kaynağı |
+| `urunler.*.resmiIAF`, `resmiPompa`, `resmiFif` | Aynı dönemin İAF, pompa ve FİF tutarı |
+| `karar.harcMuafiyetiSonGun`, `paketBitis` | Muafiyetin son günü ve paketin sona erme tarihi |
+| `bugunkuKurallar.ayar` | `tampon`, `rihtim`, `belediye`, `turizm`, `prim`, `kdv`: boolean; `gumruk`: yüzde; `fifMod`: `resmi` |
+| `varsayim.kur`, `varsayim.nakliye` | Model kuru (TL/USD) ve nakliye (TL/litre) |
+| `karar.veriGuncelleme` | Modelin elle güncellendiği gün |
+| `kayitlar` | Radarın tarihli piyasa verileri; otomasyon bunları değiştirmez |
+
+Model İAF × 1,18 × (KDV varsa 1,10) ile model pompa fiyatının tutarlılığı doğrulanır. Modelin resmî fiyatı yeniden üretmesi tüm vergi matrahlarının bağımsız doğrulanması anlamına gelmez.
+
+## Yerelde çalıştırma ve test
+
+Node.js 22 ve otomatik okuyucu için Python 3.12 kullanılır:
 
 ```bash
-npm install
+npm ci
+python -m pip install -r scripts/requirements.txt
 npm run dev
 ```
 
+```bash
+npm test
+python -m unittest discover -s tests -p 'test_*.py'
+npm run build
+npm run prices:update
+```
+
+Son komut gerçek kaynaktan okuyup yerel veri dosyasını günceller. Testler internete bağımlı değildir. PDF örneği: 10 Eylül 2026, sayı 169, PDF sayfa 35 (basılı sayfa 4170).
+
 ## Sınırlar
 
-- Tahmin koşullu bir senaryodur; yöntemin geçmiş haftalardaki isabeti henüz ölçülmedi.
-- Rıhtım harcı oranı, belediye ücretinin matrahı, nakliye bedeli ve gümrük oranı resmi kaynakta doğrulanamadı.
-- 98 oktan, 95'e resmi fiyatlardan çıkan sabit bir primle hesaplanır.
-- "Güncel fiyatları internetten getir" düğmesi yalnızca Claude içindeki sürümde görünür; herkese açık sitede API
-  anahtarı olmadığı için kapalıdır.
+- Resmî Gazete'nin HTML/PDF biçimi değişirse okuyucu durur. Hatayı incele veya manuel yöntemi kullan. Taranmış PDF için otomatik OCR uygulanmaz.
+- Radar koşullu senaryodur. Günlük kotasyon/kur beslemesi otomatik değildir; ortak JSON veya kişisel günlük üzerinden eklenir.
+- 98 oktan tahmini, 95 oktana modelden çıkan sabit prim ekler. Geçmiş haftalardaki tahmin isabeti ölçülmedi.
+- Rıhtım oranı, belediye matrahı, nakliye ve gümrük varsayımları bağımsız resmî cetvelle doğrulanmış değildir.
+- Kaynak kodundaki ayrı fiyat/yedek kotasyon listesi kaldırıldı. Çevrimdışı yedek derlemede aynı JSON'dan alınır.
+- Özel veri sağlayıcılarının kotasyonlarını yeniden yayımlamadan önce kullanım haklarını kontrol et. Otomasyon yalnız resmî pompa fiyat cetvelini kullanır.
+- Kullanıcının radar kayıtları kendi tarayıcısında saklanır. Ortak JSON'a girilen veriler depoda ve sitede herkese açıktır.
