@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { piyasaDogrula, fiyatBirlestir, kktcBugun, tarihGecerli } from "../src/piyasa.js";
+import { piyasaDogrula, fiyatBirlestir, kktcBugun, tarihGecerli, DAMGA_TAZELEME_SAAT } from "../src/piyasa.js";
 import { piyasaYukle, veriKimligi } from "../src/veriYukle.js";
 import { hesapla, ortukCif } from "../src/hesap.js";
 
@@ -98,4 +98,26 @@ test("HTTP failure, invalid JSON and stale response keep the last good data", as
 
 test("slow requests are aborted", async () => {
   await assert.rejects(piyasaYukle("test", base(), { timeoutMs: 10, fetcher: async (_url, { signal }) => new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(new Error("aborted")))) }), /aborted/);
+});
+
+test("an unchanged price does not restamp the file within a day", () => {
+  const ilk = fiyatBirlestir(base(), futurePrice(), now);
+  const dosya = (veri) => JSON.stringify(veri, null, 2);
+
+  // Aynı gün içindeki ikinci kontrol dosyayı hiç değiştirmemeli: boş commit ve
+  // gereksiz yeniden yayın buradan doğuyordu.
+  const ayniGun = fiyatBirlestir(ilk, futurePrice(), new Date("2026-09-18T21:00:00Z"));
+  assert.equal(ayniGun.guncelFiyatlar.kontrolZamani, now.toISOString());
+  assert.equal(dosya(ayniGun), dosya(ilk));
+
+  // Damga yine de günde bir tazelenir; yoksa iki günlük bayatlık uyarısı yanlışlıkla çıkar.
+  const ertesiGun = new Date("2026-09-19T09:00:00Z");
+  assert.equal(fiyatBirlestir(ilk, futurePrice(), ertesiGun).guncelFiyatlar.kontrolZamani, ertesiGun.toISOString());
+  assert.ok(DAMGA_TAZELEME_SAAT * 3600000 < 2 * 86400000, "Tazeleme aralığı bayatlık eşiğinden kısa olmalı.");
+
+  // Fiyat değiştiyse aralık beklenmez.
+  const yeniFiyat = futurePrice();
+  yeniFiyat.urunler.b95.resmiPompa = 75.5;
+  const hemen = new Date("2026-09-18T10:00:00Z");
+  assert.equal(fiyatBirlestir(ilk, yeniFiyat, hemen).guncelFiyatlar.kontrolZamani, hemen.toISOString());
 });

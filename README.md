@@ -67,6 +67,10 @@ npm run build
 
 Ardından `public/data/piyasa.json` değişikliğini commit edip `main` dalına gönder. JSON'u doğrudan GitHub düzenleyicisinden de değiştirebilirsin; yayın öncesi aynı doğrulama çalışır.
 
+Otomatik kontrol günde beş kez çalışır ama yalnız fiyat değiştiğinde commit atıp siteyi yeniden yayınlar.
+`guncelFiyatlar.kontrolZamani` damgası fiyat aynıysa günde bir tazelenir; böylece hem boş commit birikmez
+hem de uygulamadaki iki günlük "kaynak yakın zamanda doğrulanmadı" uyarısı yanlışlıkla çıkmaz.
+
 ## Pompa fiyatı ile hesap modelinin farkı
 
 ### Kişisel piyasa günlüğü için kaynaklar

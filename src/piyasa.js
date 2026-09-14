@@ -82,6 +82,26 @@ export function piyasaDogrula(veri, today = kktcBugun()) {
   return veri;
 }
 
+// Anahtar sırasından bağımsız karşılaştırma: fiyat yükü Resmî Gazete betiğinden
+// ya da manuel girdiden gelir, alan sırası kaynağa göre değişebilir.
+function kanonik(deger) {
+  if (Array.isArray(deger)) return deger.map(kanonik);
+  if (deger && typeof deger === "object") {
+    return Object.fromEntries(Object.keys(deger).sort().map(anahtar => [anahtar, kanonik(deger[anahtar])]));
+  }
+  return deger;
+}
+function fiyatKimligi(fiyat) {
+  const { kontrolZamani, ...yuk } = fiyat || {};
+  return JSON.stringify(kanonik(yuk));
+}
+
+// Damga her kontrolde tazelenirse fiyat aynıyken bile dosya değişir; otomasyon
+// günde beş kez boş commit atıp Pages'i yeniden yayınlar. Fiyat değişmediyse
+// damga günde bir yenilenir: App.jsx'teki "kaynak yakın zamanda doğrulanmadı"
+// uyarısı iki günlük eşiğe baktığı için bu aralık uyarıyı erken tetiklemez.
+export const DAMGA_TAZELEME_SAAT = 24;
+
 export function fiyatBirlestir(veri, fiyat, now = new Date()) {
   const today = kktcBugun(now);
   piyasaDogrula(veri, today);
@@ -89,6 +109,10 @@ export function fiyatBirlestir(veri, fiyat, now = new Date()) {
   gerekli(fiyat.tarih >= veri.guncelFiyatlar.tarih, "Eski fiyatlar güncel fiyatların üzerine yazılamaz.");
   gerekli(fiyat.kaynak.yayinTarihi >= veri.guncelFiyatlar.kaynak.yayinTarihi, "Eski kaynak yeni kaynağın üzerine yazılamaz.");
   const next = structuredClone(veri);
-  next.guncelFiyatlar = { ...fiyat, kontrolZamani: now.toISOString() };
+  const onceki = veri.guncelFiyatlar.kontrolZamani;
+  const degisti = fiyatKimligi(veri.guncelFiyatlar) !== fiyatKimligi(fiyat);
+  const eskidi = !Number.isFinite(Date.parse(onceki))
+    || now.getTime() - Date.parse(onceki) >= DAMGA_TAZELEME_SAAT * 3600000;
+  next.guncelFiyatlar = { ...fiyat, kontrolZamani: degisti || eskidi ? now.toISOString() : onceki };
   return piyasaDogrula(next, today);
 }
