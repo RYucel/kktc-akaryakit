@@ -26,6 +26,14 @@ export const PIYASA_KAYNAKLARI = {
       { ad: "ICE gün sonu raporu", url: "https://www.ice.com/report/10" },
     ],
   },
+  hsfo: {
+    aciklama: "European 3.5% Fuel Oil Barges FOB Rotterdam (Platts) vadeli fiyatı, NYMEX kodu UV; USD/metrik ton. Elektrik üretiminin ağır yakıt maliyeti bu seriye bağlıdır; motorin/gasoil serisiyle karıştırma.",
+    erisim: "Gün sonu uzlaşma değeridir; işlem hacmi düşüktür ve bazı günler yeni uzlaşma yayımlanmaz. VLSFO (%0,5) veya Singapur 380cst serisini bu alana yazma.",
+    linkler: [
+      { ad: "NYMEX UV ürün tanımı", url: "https://www.cmegroup.com/markets/energy/refined-products/northwest-europe-nwe-35pct-fuel-oil-rotterdam-barges-swap-futures.html" },
+      { ad: "ICE gün sonu raporu", url: "https://www.ice.com/report/10" },
+    ],
+  },
   brent: {
     aciklama: "Brent Oil vadeli fiyatı; USD/varil. Daily (günlük) tabloda ilgili günün Price (kapanış) değerini al. WTI veya benzin fiyatını seçme.",
     erisim: "Investing.com gösterge verisidir; borsanın resmî uzlaşması için ICE raporunu kullan. Aynı vade serisini izle; Brent yalnız yaklaşık tahminde kullanılır.",

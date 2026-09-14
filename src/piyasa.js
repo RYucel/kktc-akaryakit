@@ -66,7 +66,7 @@ export function piyasaDogrula(veri, today = kktcBugun()) {
   for (const kayit of veri.kayitlar) {
     tarih(kayit?.tarih, "Günlük tarihi");
     gerekli(kayit.tarih <= today, "Günlük kaydı gelecek tarihli olamaz.");
-    for (const key of ["b95", "dz", "eurobob", "gasoil", "brent", "kur"]) {
+    for (const key of ["b95", "dz", "eurobob", "gasoil", "hsfo", "brent", "kur"]) {
       if (kayit[key] != null) sayi(kayit[key], 0.01, 10000, `Günlük ${key}`);
     }
     for (const key of ["kaynak", "not"]) if (kayit[key] != null) gerekli(typeof kayit[key] === "string", `Günlük ${key} metin olmalı.`);

@@ -80,6 +80,7 @@ Zam radarı → **Değer ekle** formunda her alanın altında kaynak, birim ve h
 - **Benzin/dizel CIF Med:** [Platts European Marketscan](https://www.spglobal.com/energy/en/products-solutions/upstream-midstream-oil-gas/platts-european-marketscan). Abonelik ürünüdür; bağlantı güncel fiyat tablosu değildir. Benzin için `AAWZB00`, dizel için `AAWYZ00`, USD/metrik ton. Erişim yoksa boş bırak.
 - **Eurobob:** [ICE Futures Europe gün sonu raporu](https://www.ice.com/report/10), [GX Oxy ürün tanımı, MHN](https://www.ice.com/products/83047818). Tarih, ürün ve en yakın vadenin uzlaşma fiyatı, USD/metrik ton. Rapor erişimi üyelik gerektirebilir.
 - **Gasoil:** [tarihli gösterge fiyatları](https://www.investing.com/commodities/london-gas-oil-historical-data), USD/metrik ton.
+- **HSFO 3,5%:** European 3.5% Fuel Oil Barges FOB Rotterdam (Platts) vadeli, NYMEX kodu `UV`; USD/metrik ton. Elektrik üretiminin (KIB-TEK No.6 fuel-oil) maliyet göstergesidir; pompa fiyatı modeline girmez, yalnız radar tablosunda izlenir. VLSFO (%0,5) ve Singapur 380cst farklı serilerdir.
 - **Brent:** [tarihli gösterge fiyatları](https://www.investing.com/commodities/brent-oil-historical-data), USD/varil. Gasoil ve Brent için borsanın resmî uzlaşma fiyatı ICE raporundan kontrol edilebilir.
 - **Dolar:** [KKTC Merkez Bankası tarihli kurlar](https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama), USD satırındaki **Döviz Satış (TRY)**.
 

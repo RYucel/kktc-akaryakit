@@ -2,7 +2,7 @@ const VARIL_TON = { benzin: 1000 / 0.775 / 158.987, dizel: 1000 / 0.845 / 158.98
 
 const KALIBRASYON_GUN = 5;
 
-export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "brent", "kur"];
+export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "brent", "kur"];
 
 export function farkHesapla(sirali, hedef, vekil, tarih) {
   const ciftler = sirali.filter((k) => typeof k[hedef] === "number" && typeof k[vekil] === "number");

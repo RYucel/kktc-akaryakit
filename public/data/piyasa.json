@@ -87,6 +87,32 @@
       "kur": 48.5,
       "kaynak": "başlangıç",
       "not": "Brent: 10 Eylül kapanışı."
+    },
+    {
+      "tarih": "2026-09-11",
+      "gasoil": 1479.25,
+      "hsfo": 551.085,
+      "brent": 104.61,
+      "kaynak": "TradingView (gecikmeli)",
+      "not": "Cuma uzlaşmaları: gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 14 Eylül seans içi değerinden günlük değişim düşülerek; HSFO NYMEX:UV1! son yayımlanan uzlaşma. ICE/Platts resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "ICE gün sonu raporu",
+          "url": "https://www.ice.com/report/10"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-14",
+      "kur": 48.5178,
+      "kaynak": "KKTC Merkez Bankası",
+      "not": "14 Eylül 2026 tarihinde geçerli resmî kur, USD Döviz Satış. Aynı güne ait gasoil/Brent seans içi değerleri (1497,25 ve 107,67) gün kapanmadığı için girilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "Merkez Bankası tarihli kurlar",
+          "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        }
+      ]
     }
   ]
 }
