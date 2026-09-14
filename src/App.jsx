@@ -3,6 +3,7 @@ import { ALANLAR, farkHesapla, turet, gunlukBirlestir } from "./tahmin.js";
 import { SABIT, hesapla, ortukCif } from "./hesap.js";
 import yerlesikVeri from "../public/data/piyasa.json";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "./piyasa.js";
+import { PIYASA_KAYNAKLARI } from "./piyasaKaynaklari.js";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine,
   ResponsiveContainer, CartesianGrid,
@@ -1111,20 +1112,49 @@ Respond with ONLY this JSON object, no markdown, no commentary:
             Bildiğin kadarını gir. Benzin CIF Med yoksa Eurobob'dan, dizel CIF Med yoksa gasoil'den tahmin edilir; bunun için
             en az bir gün hem CIF Med hem vekil değeri girilmiş olmalı. O da yoksa Brent değişimi kullanılır.
           </p>
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[["tarih", "Tarih", "date"], ["b95", "Benzin CIF Med ($/t)"], ["dz", "Dizel CIF Med ($/t)"], ["eurobob", "Eurobob vadeli ($/t)"], ["gasoil", "Gasoil vadeli ($/t)"], ["brent", "Brent ($/varil)"], ["kur", "Dolar (TL)"]].map(([a, et, tip]) => (
-              <label key={a} className="text-sm">
-                <span style={{ color: T.mute }}>{et}</span>
-                <input type={tip || "text"} inputMode={tip ? undefined : "decimal"} value={form[a]} max={tip ? bugun : undefined}
-                  onChange={(e) => setForm({ ...form, [a]: e.target.value })}
-                  className="mt-1 w-full rounded-lg px-3 py-2 text-right" style={giris} />
-              </label>
-            ))}
+          <div className="mt-4 rounded-lg border p-3 text-sm leading-relaxed" style={{ background: T.yuzey, borderColor: T.cizgi }}>
+            <h3 className="font-semibold">Doğru veriyi nereden bulurum?</h3>
+            <p className="mt-1" style={{ color: T.mute }}>
+              Her alanın altında kaynak bağlantısı var. Piyasa günü tamamlandıktan sonra kapanış veya uzlaşma değerini kullan;
+              gün içindeki son fiyatı günlük kapanış sanma. Fiyatın kendi tarihini seç; farklı tarihlere ait değerleri ayrı kaydet.
+            </p>
+            <p className="mt-1" style={{ color: T.mute }}>
+              İngilizce tabloda <strong>1,250.50</strong> yazıyorsa <strong>1250.50</strong> olarak gir. Vade ayını ve kaynak bağlantısını notuna ekle.
+              Kaynakta tarih veya doğru birim yoksa alanı boş bırak. Bağlantılar yeni sekmede açılır.
+            </p>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[["tarih", "Tarih", "date"], ["b95", "Benzin CIF Med ($/t)"], ["dz", "Dizel CIF Med ($/t)"], ["eurobob", "Eurobob vadeli ($/t)"], ["gasoil", "Gasoil vadeli ($/t)"], ["brent", "Brent ($/varil)"], ["kur", "Dolar (TL)"]].map(([a, et, tip]) => {
+              const kaynak = PIYASA_KAYNAKLARI[a];
+              return (
+                <div key={a} className="min-w-0 text-sm">
+                  <label htmlFor={`radar-${a}`}>
+                    <span className="font-medium">{et}</span>
+                    <input id={`radar-${a}`} type={tip || "text"} inputMode={tip ? undefined : "decimal"} value={form[a]} max={tip ? bugun : undefined}
+                      aria-describedby={`radar-${a}-yardim`}
+                      onChange={(e) => setForm({ ...form, [a]: e.target.value })}
+                      className="mt-1 w-full rounded-lg px-3 py-2 text-right" style={giris} />
+                  </label>
+                  <p id={`radar-${a}-yardim`} className="mt-2 text-xs leading-relaxed" style={{ color: T.mute }}>
+                    {kaynak?.aciklama || "Verinin ait olduğu günü seç. Bu kayıtta doldurduğun tüm alanlar aynı tarihe ait olmalı."}
+                  </p>
+                  {kaynak && <>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                      {kaynak.linkler.map(link => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer"
+                        className="underline underline-offset-2" style={{ color: T.vurgu }}>
+                        {link.ad} <span aria-hidden="true">↗</span><span className="sr-only"> (yeni sekme)</span>
+                      </a>)}
+                    </div>
+                    {kaynak.erisim && <p className="mt-2 text-xs leading-relaxed" style={{ color: T.mute }}>{kaynak.erisim}</p>}
+                  </>}
+                </div>
+              );
+            })}
           </div>
           <label className="mt-3 block text-sm">
             <span style={{ color: T.mute }}>Kaynak notu</span>
             <input type="text" value={form.not} onChange={(e) => setForm({ ...form, not: e.target.value })}
-              placeholder="örn. Med 10 CIF grafiği" className="mt-1 w-full rounded-lg px-3 py-2" style={giris} />
+              placeholder="örn. ICE MHN, Ekim 2026 vadesi, Settlement; kaynak bağlantısı" className="mt-1 w-full rounded-lg px-3 py-2" style={giris} />
           </label>
           {formHata && <p className="mt-3 text-sm" style={{ color: T.artis }} role="alert">{formHata}</p>}
           <p className="mt-3 text-xs" style={{ color: T.mute }}>Aynı güne ikinci kez değer girersen o günün kaydı güncellenir, yeni gün eklenmez.</p>

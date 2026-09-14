@@ -69,6 +69,20 @@ Ardından `public/data/piyasa.json` değişikliğini commit edip `main` dalına 
 
 ## Pompa fiyatı ile hesap modelinin farkı
 
+### Kişisel piyasa günlüğü için kaynaklar
+
+Zam radarı → **Değer ekle** formunda her alanın altında kaynak, birim ve hangi sütunun okunacağı bulunur:
+
+- **Benzin/dizel CIF Med:** [Platts European Marketscan](https://www.spglobal.com/energy/en/products-solutions/upstream-midstream-oil-gas/platts-european-marketscan). Abonelik ürünüdür; bağlantı güncel fiyat tablosu değildir. Benzin için `AAWZB00`, dizel için `AAWYZ00`, USD/metrik ton. Erişim yoksa boş bırak.
+- **Eurobob:** [ICE Futures Europe gün sonu raporu](https://www.ice.com/report/10), [GX Oxy ürün tanımı, MHN](https://www.ice.com/products/83047818). Tarih, ürün ve en yakın vadenin uzlaşma fiyatı, USD/metrik ton. Rapor erişimi üyelik gerektirebilir.
+- **Gasoil:** [tarihli gösterge fiyatları](https://www.investing.com/commodities/london-gas-oil-historical-data), USD/metrik ton.
+- **Brent:** [tarihli gösterge fiyatları](https://www.investing.com/commodities/brent-oil-historical-data), USD/varil. Gasoil ve Brent için borsanın resmî uzlaşma fiyatı ICE raporundan kontrol edilebilir.
+- **Dolar:** [KKTC Merkez Bankası tarihli kurlar](https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama), USD satırındaki **Döviz Satış (TRY)**.
+
+Günlük tabloda tamamlanan günün kapanışını kullan; aynı kayıt içindeki tüm değerler aynı tarihe ait olmalı. Kaynak ve vade ayını not et; farklı ürün/sağlayıcı/vade serilerini karıştırma. İngilizce `1,250.50` değerini `1250.50` olarak gir. Bağlantılar fiyatları uygulamaya otomatik aktarmaz.
+
+### Hesap modelinin güncellenmesi
+
 **Otomasyon pompa fiyatını günceller; vergi mevzuatını yorumlamaz.** `guncelFiyatlar` son emirnameyi, `karar`, `urunler`, `bugunkuKurallar` ve `varsayim` hesap modelinin son elle doğrulanan sürümünü tutar.
 
 Pompa fiyatı değişip model yenilenmediyse uygulama uyarı gösterir. Döküm ve radar eski varsayımlara bağlı kalır; yeni İAF eski fonlarla sessizce birleştirilmez.
