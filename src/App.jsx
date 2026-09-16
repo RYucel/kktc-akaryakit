@@ -50,6 +50,10 @@ const KALEM_SIRA = ["urun", "tampon", "ithalatci", "nakliye", "bayi", "fif", "ha
 /*  Ürün özellikleri; tarihli fiyatlar tek JSON dosyasından gelir      */
 /* ================================================================== */
 
+// Kotasyon adları Tüzük md. 4'ten: 95 ve 98 oktan için aynı "Prem Unl 10 ppm" CIF fiyatı,
+// Eurodiesel için "10 ppm ULSD" CIF fiyatı kullanılır. Esas, cargoes CIF Med Basis
+// Genova/Lavera günlük fiyatlarının üst ve alt limitlerinin $/M.Ton ortalamasıdır.
+// Yoğunluklar md. 8 tablosundan (Benzin 95/98: 0,775 — Motorin ve Euro Diesel: 0,845).
 const URUNLER = {
   b95: {
     ad: "Benzin 95", kotasyon: "Prem Unl 10 ppm CIF Med", yogunluk: 0.775,

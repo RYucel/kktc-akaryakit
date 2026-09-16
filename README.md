@@ -71,6 +71,41 @@ Otomatik kontrol günde beş kez çalışır ama yalnız fiyat değiştiğinde c
 `guncelFiyatlar.kontrolZamani` damgası fiyat aynıysa günde bir tazelenir; böylece hem boş commit birikmez
 hem de uygulamadaki iki günlük "kaynak yakın zamanda doğrulanmadı" uyarısı yanlışlıkla çıkmaz.
 
+## Mevzuat dayanağı
+
+Hesap modelinin oranları **2001 Petrol Ürünlerinin Fiyatlandırma Esaslarını Düzenleyen Tüzük**'ün
+10.09.2026 (R.G. 169 – EK III – A.E. 822) ile birleştirilmiş şekline karşı kontrol edildi
+([Merkezi Mevzuat Dairesi](https://mevzuat.gov.ct.tr/)).
+
+| Model sabiti | Tüzük | Durum |
+| --- | --- | --- |
+| `tampon` %3 | md. 2 "Tavan Fiyatı": İthal Parite Fiyatı'nın %3 fazlası | doğrulandı |
+| `ithalatci` %4 | md. 14(a): CİF Mal Bedeli Fiyatı üzerinden; 95, 98, gazyağı ve Eurodiesel için %4 | doğrulandı (matrah dahil) |
+| `bayi` %18 | md. 14(b): İthalatçı Şirket KDV hariç azami satış fiyatı üzerinden %18 | doğrulandı |
+| Yoğunluklar 0,775 / 0,845 | md. 8 tablosu | doğrulandı |
+| Kotasyonlar | md. 4: 95 ve 98 için aynı "Prem Unl 10 ppm", Eurodiesel için "10 ppm ULSD" | doğrulandı |
+| `rihtim`, `belediye`, `prim`, turizm fonu | Tüzükte geçmiyor; md. 2 yalnız "Vergi ve Harçlar" der | doğrulanamadı |
+| `nakliye` (sabit TL/litre) | md. 14(c): "km × Lt × katsayı" formülü, yılda en az iki kez belirlenir | modelde sabit kabul |
+
+İki ayrıntı kodda tam karşılanmıyor:
+
+- **Kotasyon esası.** md. 4 fiyatı *cargoes CIF Med Basis Genova/Lavera* günlük değerlerinin
+  **üst ve alt limitlerinin ortalaması** olarak tanımlar. Radar alanı yalnız "CIF Med" der;
+  farklı bir Akdeniz serisi girilirse model sessizce sapar.
+- **Ortalama penceresi.** md. 5 tavanın uygulandığı günden başlayarak son 15 günün İPF
+  ortalamasına bakar; uygulamadaki tahmin penceresi haftalık (Cuma–Perşembe) fiyatlama
+  ritmini izler. İkisi farklı şeydir; koridor göstergesi md. 5'i ayrıca hesaplar.
+
+### Fiyat değişim koridoru (md. 2, 5 ve 6)
+
+Tüzük zam tetikleyicisini sayısal olarak tanımlar:
+
+- **md. 2** — "Fiyat Değişim Koridoru": İthal Parite Fiyatı değişikliğinin içinde kaldığı **artı veya eksi %3** aralığı.
+- **md. 5** — Tavanın uygulamaya konulduğu günden başlamak üzere (önceki günler hesaba alınmaksızın)
+  hesaplanan **son 15 günün İPF ortalaması** koridorun dışına çıkarsa ithalatçılar tavanı yeniden belirler.
+  Dini, milli, resmi, idari ve hafta sonu tatillerine isabet eden günlerde bu işlem yapılmaz.
+- **md. 6** — Bilgi verildikten sonra **en geç 24 saat** içinde Ekonomi Bakanlığı emirname ile ilan eder.
+
 ## Pompa fiyatı ile hesap modelinin farkı
 
 ### Kişisel piyasa günlüğü için kaynaklar

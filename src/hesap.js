@@ -1,9 +1,20 @@
+// Oranların kaynağı: 2001 Petrol Ürünlerinin Fiyatlandırma Esaslarını Düzenleyen Tüzük,
+// 10.09.2026 (R.G. 169 – EK III – A.E. 822) ile birleştirilmiş şekli.
+// Tüzükte doğrulananlar ve doğrulanamayanlar aşağıda ayrı ayrı işaretlidir.
 export const SABIT = {
-  tampon: 0.03,     // Tüzük md. 2: tavan = parite × 1,03 + ...
-  ithalatci: 0.04,  // md. 14(a)
-  bayi: 0.18,       // md. 14(b)
-  rihtim: 0.022,    // doğrulanmadı: MAGO verisinden türetildi
-  belediye: 0.015,  // Belediyeler Yasası md. 94(8); matrah doğrulanmadı
+  // DOĞRULANDI — md. 2 "Tavan Fiyatı": İthal Parite Fiyatı'nın %3 fazlası.
+  tampon: 0.03,
+  // DOĞRULANDI — md. 14(a): CİF Mal Bedeli Fiyatı üzerinden %4
+  // (Kurşunsuz Benzin 95, 98, Gazyağı ve Eurodiesel için aynı oran). Matrah CIF'tir,
+  // tamponlu değer değil; kod da payı CIF üzerinden alır.
+  ithalatci: 0.04,
+  // DOĞRULANDI — md. 14(b): İthalatçı Şirket KDV hariç azami satış fiyatı üzerinden %18.
+  bayi: 0.18,
+  // DOĞRULANMADI — Tüzükte geçmiyor; md. 2 yalnız "Vergi ve Harçlar" diyor. MAGO verisinden türetildi.
+  rihtim: 0.022,
+  // DOĞRULANMADI — Tüzükte geçmiyor. Belediyeler Yasası md. 94(8); matrah doğrulanmadı.
+  belediye: 0.015,
+  // DOĞRULANMADI — Tüzükte oran yok. Fiyat İstikrar Fonu miktarları md. 15-16 uyarınca Emirname ile belirlenir.
   prim: 0.01,       // yalnız mazot, CIF üzerinden
   kdv: 0.1,         // KDV açıldığında uygulanacak oran
   eskiFif: 9.1179,  // kriz öncesi 95 FİF'i (MAGO)
