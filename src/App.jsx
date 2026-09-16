@@ -854,7 +854,15 @@ function ZamRadari({ nakliye, onIncele }) {
 
   const bugun = bugunIso();
   const pencere = aktifPencere();
-  const turetilmis = useMemo(() => turet(kayitlar, KARAR.resmiFiyatTarihi), [kayitlar]);
+  // Resmî fiyatı üreten fiyatlama penceresi: yürürlük tarihinden bir hafta öncesinin penceresi.
+  // Çapa CIF (resmî fiyattan geri hesaplanan) bu günlerin ortalamasıdır; kalibrasyonda vekil
+  // ortalaması da aynı günlerden alınmalı, yoksa yükselen piyasada fark sistematik sapar.
+  const fiyatPenceresi = useMemo(() => {
+    const d = isodanTarih(KARAR.resmiFiyatTarihi);
+    d.setDate(d.getDate() - 7);
+    return { gunler: aktifPencere(d).isoGunler };
+  }, []);
+  const turetilmis = useMemo(() => turet(kayitlar, fiyatPenceresi), [kayitlar, fiyatPenceresi]);
   const gecerli = turetilmis.filter((k) => k.tarih <= bugun); // gelecek tarihli kayıt hesaba girmez
   const penceredeki = gecerli.filter((k) => pencere.isoGunler.includes(k.tarih));
   const girilenGun = penceredeki.filter((k) => (k.b95 != null && !k.tahmini.includes("b95")) || (k.dz != null && !k.tahmini.includes("dz"))).length;
@@ -902,8 +910,8 @@ function ZamRadari({ nakliye, onIncele }) {
   const farkBenzin = farkHesapla(siraliKayit, "b95", "eurobob", bugun);
   const farkDizel = farkHesapla(siraliKayit, "dz", "gasoil", bugun);
   // Günlük eşleşme yoksa resmî fiyatın dayandığı pencereden kalibrasyon
-  const pencereBenzin = farkBenzin ? null : pencereFarki(siraliKayit, "b95", "eurobob", KARAR.resmiFiyatTarihi);
-  const pencereDizel = farkDizel ? null : pencereFarki(siraliKayit, "dz", "gasoil", KARAR.resmiFiyatTarihi);
+  const pencereBenzin = farkBenzin ? null : pencereFarki(siraliKayit, "b95", "eurobob", fiyatPenceresi);
+  const pencereDizel = farkDizel ? null : pencereFarki(siraliKayit, "dz", "gasoil", fiyatPenceresi);
   // Tüzük md. 5: pencere, tavanın uygulamaya konulduğu günde başlar; önceki günler sayılmaz.
   const koridorlar = ["b95", "dz"].map((k) => {
     const u = URUNLER[k];

@@ -102,12 +102,19 @@ CIF Med kotasyonları abonelik ürünüdür; çoğu gün elde olmaz. Model bu y�
 kullanır (benzinde Eurobob, dizelde gasoil) ve aradaki **Akdeniz farkı**nı kalibre etmeye
 çalışır. İki yol var, bu sırayla denenir:
 
-1. **Günlük eşleşme** — aynı güne hem CIF Med hem vekil girilmişse son 5 çiftin ortalama farkı.
-   En güvenilir yol.
-2. **Resmî pencere** — eşleşme yoksa: resmî fiyattan geriye hesaplanan CIF (`ortukCif`) ile,
-   o fiyatın yürürlük tarihinden geriye 15 günlük penceredeki vekil ortalamasının farkı.
-   Günlük eşleşme gerekmez; iki seri aynı pencerede ayrı ayrı bilinse yeter. Kaynağı Resmî
-   Gazete olduğu için aboneliğe ihtiyaç duymaz.
+1. **Günlük eşleşme** — aynı güne hem CIF Med hem vekil **gözlenmişse** son 5 çiftin ortalama
+   farkı. En güvenilir yol. Resmî fiyattan geriye hesaplanan CIF bu yola girmez: o değer günlük
+   bir kotasyon değil, fiyatlama penceresinin ortalamasıdır; günlük bir vekil kapanışıyla
+   eşleştirmek elma-armut karşılaştırmasıdır.
+2. **Resmî pencere** — eşleşme yoksa: resmî fiyattan geriye hesaplanan CIF ile, **o fiyatı üreten
+   fiyatlama penceresindeki** vekil ortalamasının farkı. Pencere, yürürlük tarihinden bir hafta
+   öncesinin Cuma–Çarşamba aralığıdır — yani çapanın kendisinin ortalandığı günler. Günlük
+   eşleşme gerekmez; iki seri aynı pencerede ayrı ayrı bilinse yeter. Kaynağı Resmî Gazete
+   olduğu için aboneliğe ihtiyaç duymaz.
+
+   Pencere uzunluğu önemlidir. Yükselen piyasada uzun pencere ucuz günleri içine alır ve farkı
+   sistematik olarak yukarı iter: Eylül 2026'da 15 takvim günü +4,78 \$/t verirken, fiyatı üreten
+   dört günlük pencere −7,76 \$/t veriyor. `pencereFarki` bu yüzden açık gün listesi kabul eder.
 
 İkisi de yoksa tahmin **Brent değişimine** düşer. Bu son çare kötüdür: distile ürünlerin ham
 petrolden koptuğu dönemlerde (2026 Eylül'ünde gasoil üç ayda %61, Brent %28 arttı) Brent vekili

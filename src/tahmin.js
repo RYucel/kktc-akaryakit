@@ -8,8 +8,13 @@ const PENCERE_GUN = 15;
 
 export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "brent", "kur"];
 
+// Kalibrasyon yalnız GÖZLENMİŞ CIF ile yapılır. Resmî fiyattan geriye hesaplanan değer
+// (tahminiAlanlar'da işaretli) o günün kotasyonu değil, fiyatlama penceresinin ortalamasıdır;
+// günlük bir vekil kapanışıyla eşleştirmek elma-armut karşılaştırmasıdır. Böyle bir çapa için
+// doğru araç pencereFarki'dır: vekil ortalaması da aynı pencereden alınır.
 export function farkHesapla(sirali, hedef, vekil, tarih) {
-  const ciftler = sirali.filter((k) => typeof k[hedef] === "number" && typeof k[vekil] === "number");
+  const ciftler = sirali.filter((k) => typeof k[hedef] === "number" && typeof k[vekil] === "number"
+    && !(k.tahminiAlanlar || []).includes(hedef));
   if (!ciftler.length) return null;
   const once = ciftler.filter((k) => k.tarih <= tarih);
   if (!once.length) return null; // gelecekteki kotasyon geçmiş güne sızmamalı
@@ -23,20 +28,36 @@ export function farkHesapla(sirali, hedef, vekil, tarih) {
 // hesaplanan CIF ile, o fiyatın dayandığı penceredeki vekil ortalaması. Günlük eşleşme
 // gerekmez; iki seri aynı pencerede ayrı ayrı bilinse yeter. Kaynağı Resmî Gazete olduğu
 // için abonelik gerektiren kotasyona ihtiyaç duymaz.
-export function pencereFarki(sirali, hedef, vekil, son, gun = PENCERE_GUN) {
-  if (typeof son !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(son)) return null;
-  const bas = new Date(`${son}T00:00:00Z`);
-  if (Number.isNaN(bas.getTime())) return null;
-  bas.setUTCDate(bas.getUTCDate() - gun);
-  const basIso = bas.toISOString().slice(0, 10);
-  const icte = sirali.filter((k) => k.tarih >= basIso && k.tarih < son);
+// pencere: ya resmî fiyatın yürürlük tarihi (string; geriye `gun` takvim günü bakılır),
+// ya da { gunler: [iso...] } ile o fiyatı üreten fiyatlama penceresinin günleri.
+// Açık gün listesi tercih edilir: çapa CIF'in kendisi o pencerenin ortalamasıdır, farklı
+// uzunlukta bir pencereyle karşılaştırmak yükselen piyasada sistematik sapma yaratır.
+export function pencereFarki(sirali, hedef, vekil, pencere, gun = PENCERE_GUN) {
+  let icte, basIso, sonIso;
+  if (pencere && Array.isArray(pencere.gunler)) {
+    const kume = new Set(pencere.gunler.filter((t) => typeof t === "string" && /^\d{4}-\d{2}-\d{2}$/.test(t)));
+    if (!kume.size) return null;
+    const sirali2 = [...kume].sort();
+    basIso = sirali2[0];
+    sonIso = sirali2[sirali2.length - 1];
+    icte = sirali.filter((k) => kume.has(k.tarih));
+  } else {
+    const son = pencere;
+    if (typeof son !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(son)) return null;
+    const bas = new Date(`${son}T00:00:00Z`);
+    if (Number.isNaN(bas.getTime())) return null;
+    bas.setUTCDate(bas.getUTCDate() - gun);
+    basIso = bas.toISOString().slice(0, 10);
+    sonIso = son;
+    icte = sirali.filter((k) => k.tarih >= basIso && k.tarih < son);
+  }
   const ort = (alan) => {
     const v = icte.filter((k) => typeof k[alan] === "number" && Number.isFinite(k[alan]));
     return v.length ? { deger: v.reduce((a, k) => a + k[alan], 0) / v.length, gun: v.length } : null;
   };
   const h = ort(hedef), v = ort(vekil);
   if (!h || !v) return null;
-  return { fark: h.deger - v.deger, hedefGun: h.gun, vekilGun: v.gun, bas: basIso, son };
+  return { fark: h.deger - v.deger, hedefGun: h.gun, vekilGun: v.gun, bas: basIso, son: sonIso };
 }
 
 // pencere: resmî fiyatın yürürlük tarihi (string). Verilmezse pencere kalibrasyonu atlanır.

@@ -84,3 +84,64 @@ test("pencerede vekil ya da hedef yoksa null döner, tahmin Brent'e düşer", ()
   assert.equal(pencereFarki([{ tarih: "2026-09-09", gasoil: 1300 }], "dz", "gasoil", "2026-09-11"), null);
   assert.equal(pencereFarki([{ tarih: "2026-09-09", dz: 1, gasoil: 2 }], "dz", "gasoil", "bozuk"), null);
 });
+
+test("açık gün listesi verilen pencere, yalnız o günleri kullanır", () => {
+  const rows = [
+    { tarih: "2026-08-28", gasoil: 1280 },        // listede yok
+    { tarih: "2026-09-04", gasoil: 1321.5 },
+    { tarih: "2026-09-07", gasoil: 1374.75 },
+    { tarih: "2026-09-08", gasoil: 1351.75 },
+    { tarih: "2026-09-09", gasoil: 1388.25, dz: 1351.3 },
+    { tarih: "2026-09-16", gasoil: 1549 },
+  ];
+  const gunler = ["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"];
+  const p = pencereFarki(rows, "dz", "gasoil", { gunler });
+  assert.equal(p.vekilGun, 4);
+  assert.equal(p.hedefGun, 1);
+  assert.equal(p.bas, "2026-09-04");
+  assert.equal(p.son, "2026-09-09");
+  assert.ok(Math.abs(p.fark - (1351.3 - 1359.0625)) < 1e-9);
+});
+
+test("pencere uzunluğu farkı değiştirir: yükselen piyasada uzun pencere sapma yaratır", () => {
+  const rows = [
+    { tarih: "2026-08-27", gasoil: 1221.75 },
+    { tarih: "2026-09-04", gasoil: 1321.5 },
+    { tarih: "2026-09-09", gasoil: 1388.25, dz: 1351.3 },
+  ];
+  const kisa = pencereFarki(rows, "dz", "gasoil", { gunler: ["2026-09-04", "2026-09-09"] });
+  const uzun = pencereFarki(rows, "dz", "gasoil", "2026-09-11");
+  assert.ok(uzun.fark > kisa.fark, "uzun pencere ucuz günleri içerir, farkı yukarı iter");
+});
+
+test("boş ya da geçersiz gün listesi null döner", () => {
+  const rows = [{ tarih: "2026-09-09", gasoil: 1388.25, dz: 1351.3 }];
+  assert.equal(pencereFarki(rows, "dz", "gasoil", { gunler: [] }), null);
+  assert.equal(pencereFarki(rows, "dz", "gasoil", { gunler: ["bozuk"] }), null);
+  assert.equal(pencereFarki(rows, "dz", "gasoil", { gunler: ["2026-01-01"] }), null);
+});
+
+test("resmî fiyattan türetilmiş CIF, günlük kalibrasyon çifti sayılmaz", () => {
+  const rows = [
+    { tarih: "2026-09-09", dz: 1351.3, gasoil: 1388.25, tahminiAlanlar: ["dz"] },
+    { tarih: "2026-09-16", gasoil: 1549 },
+  ];
+  assert.equal(farkHesapla(rows, "dz", "gasoil", "2026-09-16"), null);
+  // gözlenmiş bir değer girilince çift geçerli olur
+  const gozlem = [{ tarih: "2026-09-09", dz: 1400, gasoil: 1388.25 }, ...rows.slice(1)];
+  assert.ok(Math.abs(farkHesapla(gozlem, "dz", "gasoil", "2026-09-16").fark - 11.75) < 1e-9);
+});
+
+test("türetilmiş çapa varken turet pencere yolunu kullanır, günlük yolu değil", () => {
+  const rows = [
+    { tarih: "2026-09-04", gasoil: 1321.5 },
+    { tarih: "2026-09-07", gasoil: 1374.75 },
+    { tarih: "2026-09-08", gasoil: 1351.75 },
+    { tarih: "2026-09-09", gasoil: 1388.25, dz: 1351.3, tahminiAlanlar: ["dz"] },
+    { tarih: "2026-09-16", gasoil: 1549 },
+  ];
+  const gunler = ["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"];
+  const son = turet(rows, { gunler }).at(-1);
+  assert.equal(son.yontem.dz, "gasoilPencere");
+  assert.ok(Math.abs(son.dz - (1549 + (1351.3 - 1359.0625))) < 1e-9);
+});
