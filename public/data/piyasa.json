@@ -143,6 +143,36 @@
           "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
         }
       ]
+    },
+    {
+      "tarih": "2026-09-15",
+      "hsfo": 558.236,
+      "kaynak": "TradingView (gecikmeli)",
+      "not": "HSFO NYMEX:UV1! son yayımlanan uzlaşma; bu sözleşme yalnız gün sonu uzlaşması yayımlar, 16 Eylül sabahı itibarıyla en güncel değer 15 Eylül'e ait. Platts resmî değerlendirmesiyle teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "ICE gün sonu raporu",
+          "url": "https://www.ice.com/report/10"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-16",
+      "gasoil": 1549.0,
+      "brent": 108.09,
+      "kur": 48.646,
+      "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası",
+      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış.",
+      "kaynaklar": [
+        {
+          "ad": "ICE gün sonu raporu",
+          "url": "https://www.ice.com/report/10"
+        },
+        {
+          "ad": "Merkez Bankası tarihli kurlar",
+          "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        }
+      ]
     }
   ]
 }
