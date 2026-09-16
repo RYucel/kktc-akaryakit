@@ -65,8 +65,21 @@ ama otomatik çekilemiyor.
 ortalaması sahte olur. `kur` bu kuralın dışındadır: Merkez Bankası kuru o gün için resmî olarak
 ilan edilir, kapanış beklemez.
 
-Hangi kaynağın çalıştığı ağa göre değişir (bazı siteler bulut IP'lerini engeller). Cron'a
-bağlamadan önce kendi makinende ve bir kez de GitHub Actions üzerinde deneme kipinde çalıştır.
+Hangi kaynağın çalıştığı ağa göre değişir (bazı siteler bulut IP'lerini engeller). Yeni bir
+kaynak eklerken önce kendi makinende, sonra Actions üzerinde deneme kipinde çalıştır.
+
+### Otomatik çalışma
+
+**Kotasyonları güncelle** iş akışı hafta içi **UTC 06:40 ve 21:40**'ta çalışır: sabah koşusu
+Merkez Bankası kurunu, akşam koşusu NYMEX/ICE kapanışlarını hedefler. Yalnız doğrulanan değerler
+yazılır, dolu alanın üzerine yazılmaz, değişiklik yoksa commit atılmaz.
+
+Actions ekranından elle de çalıştırılabilir; **deneme** kipini seçersen hiçbir şey yazmadan
+yalnız rapor üretir. Rapor her koşuda iş özetine (Step Summary) düşer.
+
+Fiyat emirnamesini bu iş **yakalamaz** — o ayrı bir iş akışıdır (**Akaryakıt fiyatlarını
+güncelle**). Buradaki veri yalnız zam radarı ve koridor göstergesi içindir. İkisi aynı dosyaya
+yazdığı için aynı eşzamanlılık grubunu (`fuel-price-update`) paylaşırlar; aynı anda çalışmazlar.
 
 ## Manuel güncelleme
 

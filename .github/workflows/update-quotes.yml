@@ -1,0 +1,74 @@
+name: Kotasyonları güncelle
+
+# Ücretsiz kaynaklardan kur, Brent ve NY ULSD toplar. Gasoil, HSFO ve Eurobob'un
+# ücretsiz otomatik kaynağı yok; onlar radar formundan elle giriliyor.
+#
+# Fiyat emirnamesini bu iş DEĞİL, update-prices.yml yakalar. Buradaki veri yalnız
+# zam radarı ve koridor göstergesi için.
+
+on:
+  schedule:
+    # UTC. 06:40 Merkez Bankası kurunu, 21:40 NYMEX/ICE kapanışlarını hedefler.
+    # Borsa serilerinde kapanmamış gün zaten eleniyor; erken çalışma zarar vermez.
+    - cron: '40 6,21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Çalışma kipi
+        type: choice
+        options: [yaz, deneme]
+        default: yaz
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  # Fiyat işiyle aynı dosyaya yazıyor; aynı anda çalışmasınlar.
+  group: fuel-price-update
+  cancel-in-progress: false
+
+jobs:
+  kotasyon:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Kaynakları tara
+        run: node scripts/kotasyon.mjs ${{ inputs.mode == 'deneme' && ' ' || '--yaz' }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: npm run build
+      - name: Doğrulanan kotasyonları kaydet
+        id: commit
+        run: |
+          if git diff --quiet -- public/data/piyasa.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add public/data/piyasa.json
+            git commit -m 'Kotasyonları ücretsiz kaynaklardan güncelle'
+            # Eşzamanlı elle düzenlemede güvenle başarısız olur; asla zorla push yok.
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Başarısız taramayı bildir
+        if: failure()
+        run: echo 'Kotasyon taraması tamamlanamadı. Mevcut veri korunuyor; değerler radar formundan elle girilebilir.' >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: kotasyon
+    if: needs.kotasyon.outputs.changed == 'true'
+    # GITHUB_TOKEN ile yapılan push yeni bir push iş akışı başlatmaz: yayını açıkça çağır.
+    uses: ./.github/workflows/deploy.yml
