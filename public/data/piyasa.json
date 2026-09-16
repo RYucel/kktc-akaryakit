@@ -729,8 +729,8 @@
       "gasoil": 1549,
       "brent": 108.09,
       "kur": 48.646,
-      "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası",
-      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış.",
+      "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası + Yahoo HO=F + Yahoo RB=F",
+      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
@@ -739,8 +739,30 @@
         {
           "ad": "Merkez Bankası tarihli kurlar",
           "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        },
+        {
+          "ad": "Yahoo HO=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/HO%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo RB=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
         }
-      ]
+      ],
+      "ho": 4.9881,
+      "rb": 3.2317
+    },
+    {
+      "tarih": "2026-09-17",
+      "kur": 48.6654,
+      "kaynak": "KKTC Merkez Bankası",
+      "kaynaklar": [
+        {
+          "ad": "KKTC Merkez Bankası",
+          "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        }
+      ],
+      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış."
     }
   ]
 }
