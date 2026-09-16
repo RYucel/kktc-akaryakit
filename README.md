@@ -27,6 +27,31 @@ Yalnız kontrol zamanı değişirse mevcut senaryo korunur; fiyat/model değişi
 - API anahtarı veya ücretli piyasa verisi aboneliği gerekmez. Python paketleri iş akışında kurulur.
 - GitHub uzun süre etkinlik olmayan herkese açık depolarda zamanlamayı durdurabilir. Actions durumunu takip et. Dosyaların yalnız yerelde olması otomasyonu çalıştırmaz.
 
+## Kotasyon toplayıcı (deneme aşamasında)
+
+`scripts/kotasyon.mjs` kur, Brent, gasoil ve HSFO için **ücretsiz** kaynakları dener. Varsayılan
+kip hiçbir şey yazmaz; her kaynağı deneyip ne bulduğunu raporlar:
+
+```bash
+node scripts/kotasyon.mjs                 # rapor, dosya değişmez
+node scripts/kotasyon.mjs --alan gasoil   # tek alan
+node scripts/kotasyon.mjs --yaz           # yalnız doğrulananları piyasa.json'a işle
+```
+
+Rapordaki işaretler: `✓` doğrulandı, `✗` bulundu ama elendi (aralık dışı, tarihsiz, eski,
+gelecek tarihli), `!` kaynağa erişilemedi.
+
+Disiplin `gazete.py` ile aynı: **şüpheli değeri asla yazma.** `--yaz` kipinde bile mevcut bir
+değerin üzerine yazılmaz, yalnız boş alanlar doldurulur; yazım öncesi ve sonrası `piyasaDogrula`
+çalışır. Kaynak biçim değiştirmişse ayrıştırıcı hata döndürür, dosyaya dokunulmaz.
+
+Kaynaklar `KAYNAKLAR` sabitinde sırayla denenir; yenisini eklemek bir satır ve bir ayrıştırıcıdır.
+HSFO'nun bilinen ücretsiz günlük kaynağı yok: sözleşme yalnız gün sonu uzlaşması yayımlıyor ve
+hacmi çok düşük. O alan şimdilik elle giriliyor.
+
+Hangi kaynağın çalıştığı ağa göre değişir (bazı siteler bulut IP'lerini engeller). Cron'a
+bağlamadan önce kendi makinende ve bir kez de GitHub Actions üzerinde deneme kipinde çalıştır.
+
 ## Manuel güncelleme
 
 **Actions → Akaryakıt fiyatlarını güncelle → Run workflow** ekranında:
