@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mbKur, stooqCsv, yahooChart, denetle, ARALIK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
+import { mbKur, stooqCsv, yahooChart, sec, denetle, vadeSembolleri, ARALIK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
 
 const BUGUN = "2026-09-16";
 
@@ -26,16 +26,29 @@ test("Stooq CSV kapanışı okunur, veri yoksa hata döner", () => {
   assert.match(stooqCsv("").hata, /boş/);
 });
 
-test("Yahoo chart yanıtından son geçerli kapanış alınır", () => {
+test("Yahoo chart yanıtı günlük seri döndürür, boş barlar atlanır", () => {
   const j = JSON.stringify({ chart: { result: [{
     timestamp: [1789344000, 1789430400, 1789516800],   // 14, 15, 16 Eylül 2026
     indicators: { quote: [{ close: [104.61, 108.97, null] }] },
   }] } });
   const r = yahooChart(j);
-  assert.equal(r.deger, 108.97);                    // sondaki null atlanır
-  assert.equal(r.tarih, "2026-09-15");
+  assert.deepEqual(r.seri.map((x) => x.tarih), ["2026-09-14", "2026-09-15"]);
   assert.match(yahooChart("{}").hata, /sonuç yok/);
   assert.match(yahooChart("bozuk").hata, /ayrıştırılamadı/);
+});
+
+test("borsa serilerinde kapanmamış gün elenir, kur için elenmez", () => {
+  const seri = { seri: [{ tarih: "2026-09-15", deger: 108.97 }, { tarih: "2026-09-16", deger: 107.72 }] };
+  assert.equal(sec(seri, "brent", BUGUN).deger, 108.97);        // bugünün gün içi barı atlanır
+  assert.equal(sec(seri, "kur", BUGUN).deger, 107.72);          // resmî kur bugün için geçerli
+  const yalnizBugun = { seri: [{ tarih: "2026-09-16", deger: 107.72 }] };
+  assert.match(sec(yalnizBugun, "gasoil", BUGUN).hata, /gün içi/);
+  assert.match(sec({ hata: "HTTP 404" }, "gasoil", BUGUN).hata, /404/);
+});
+
+test("vade sembolleri ay kodlarını doğru üretir ve yıl sonunda taşar", () => {
+  assert.deepEqual(vadeSembolleri("2026-09-16", "7F"), ["7FU26.NYM", "7FV26.NYM", "7FX26.NYM"]);
+  assert.deepEqual(vadeSembolleri("2026-11-02", "UV"), ["UVX26.NYM", "UVZ26.NYM", "UVF27.NYM"]);
 });
 
 test("denetle: aralık, tarih ve yaş kontrolleri", () => {

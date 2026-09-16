@@ -57,7 +57,7 @@ export function stooqCsv(metin) {
   return { deger, tarih: t && tarihGecerli(t) ? t : null };
 }
 
-// Yahoo Finance chart API: son kapanmış günün kapanışı.
+// Yahoo Finance chart API: günlük kapanış serisi.
 export function yahooChart(metin) {
   let j;
   try { j = JSON.parse(metin); } catch { return { hata: "JSON ayrıştırılamadı" }; }
@@ -65,35 +65,65 @@ export function yahooChart(metin) {
   if (!r) return { hata: j?.chart?.error?.description || "sonuç yok" };
   const zaman = r.timestamp || [];
   const kapanis = r.indicators?.quote?.[0]?.close || [];
-  for (let i = kapanis.length - 1; i >= 0; i--) {
-    if (typeof kapanis[i] === "number" && Number.isFinite(kapanis[i])) {
-      return { deger: kapanis[i], tarih: new Date(zaman[i] * 1000).toISOString().slice(0, 10) };
+  const seri = [];
+  for (let i = 0; i < kapanis.length; i++) {
+    if (typeof kapanis[i] === "number" && Number.isFinite(kapanis[i]) && zaman[i]) {
+      seri.push({ tarih: new Date(zaman[i] * 1000).toISOString().slice(0, 10), deger: kapanis[i] });
     }
   }
-  return { hata: "kapanış serisi boş" };
+  return seri.length ? { seri } : { hata: "kapanış serisi boş" };
+}
+
+// Borsa serilerinde bugünün barı henüz kapanmamıştır; kapanış diye kaydedilirse
+// gün içi bir değer uzlaşma yerine geçer. Bu yüzden kapanmamış gün elenir.
+export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo"]);
+
+export function sec(sonuc, alan, bugun) {
+  if (sonuc.hata) return sonuc;
+  const seri = sonuc.seri || (sonuc.deger != null ? [{ tarih: sonuc.tarih, deger: sonuc.deger }] : []);
+  const uygun = KAPANMIS_GUN_GEREKIR.has(alan) ? seri.filter((x) => x.tarih && x.tarih < bugun) : seri;
+  if (!uygun.length) {
+    return { hata: seri.length ? "yalnız kapanmamış günün değeri var (gün içi)" : "seri boş" };
+  }
+  return uygun[uygun.length - 1];
 }
 
 /* ---------------------------------------------------------------- */
 /*  Kaynak listesi — hepsi ücretsiz; sıra denenme sırasıdır          */
 /* ---------------------------------------------------------------- */
 
+// Yahoo'da CME'nin "European Low Sulphur Gasoil (10 ppm)" sözleşmesi 7F kodlu ve
+// vade ayına göre isimlenir (7F + ay kodu + yıl + .NYM). Sürekli sembol tutmazsa
+// önümüzdeki üç vade denenir; böylece roll döneminde de bir tanesi yanıt verir.
+const AY_KODU = ["F", "G", "H", "J", "K", "M", "N", "Q", "U", "V", "X", "Z"];
+export function vadeSembolleri(bugun, kok, adet = 3) {
+  const [y, a] = bugun.split("-").map(Number);
+  const cikti = [];
+  for (let i = 0; i < adet; i++) {
+    const ay = (a - 1 + i) % 12;
+    const yil = y + Math.floor((a - 1 + i) / 12);
+    cikti.push(`${kok}${AY_KODU[ay]}${String(yil).slice(-2)}.NYM`);
+  }
+  return cikti;
+}
+
+const yahoo = (sembol) => `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sembol)}?interval=1d&range=15d`;
+
 export const KAYNAKLAR = {
   kur: [
     { ad: "KKTC Merkez Bankası", url: "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama", ayristir: mbKur },
   ],
   brent: [
-    { ad: "Stooq cb.f", url: "https://stooq.com/q/l/?s=cb.f&f=sd2t2ohlcv&h&e=csv", ayristir: stooqCsv },
-    { ad: "Yahoo BZ=F", url: "https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF?interval=1d&range=10d", ayristir: yahooChart },
+    { ad: "Yahoo BZ=F", url: yahoo("BZ=F"), ayristir: yahooChart },
   ],
   gasoil: [
-    { ad: "Stooq qs.f", url: "https://stooq.com/q/l/?s=qs.f&f=sd2t2ohlcv&h&e=csv", ayristir: stooqCsv },
-    { ad: "Stooq lgo.f", url: "https://stooq.com/q/l/?s=lgo.f&f=sd2t2ohlcv&h&e=csv", ayristir: stooqCsv },
-    { ad: "Stooq lf.f", url: "https://stooq.com/q/l/?s=lf.f&f=sd2t2ohlcv&h&e=csv", ayristir: stooqCsv },
-    { ad: "Yahoo LGO=F", url: "https://query1.finance.yahoo.com/v8/finance/chart/LGO%3DF?interval=1d&range=10d", ayristir: yahooChart },
+    { ad: "Yahoo 7F=F", url: yahoo("7F=F"), ayristir: yahooChart },
+    ...vadeSembolleri(kktcBugun(), "7F").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
   ],
-  // HSFO'nun bilinen ücretsiz günlük kaynağı yok; sözleşme gün sonu uzlaşması yayımlıyor
-  // ve hacmi çok düşük. Aday çıkarsa buraya eklenir.
-  hsfo: [],
+  hsfo: [
+    { ad: "Yahoo UV=F", url: yahoo("UV=F"), ayristir: yahooChart },
+    ...vadeSembolleri(kktcBugun(), "UV").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
+  ],
 };
 
 /* ---------------------------------------------------------------- */
@@ -132,8 +162,8 @@ export async function topla(alanlar, bugun) {
     for (const kaynak of KAYNAKLAR[alan] || []) {
       const cevap = await getir(kaynak.url);
       if (cevap.hata) { rapor[alan].push({ ...kaynak, durum: "hata", neden: cevap.hata }); continue; }
-      const sonuc = kaynak.ayristir(cevap.metin);
-      rapor[alan].push({ ...kaynak, ...sonuc, ...denetle(alan, sonuc, bugun) });
+      const secilen = sec(kaynak.ayristir(cevap.metin), alan, bugun);
+      rapor[alan].push({ ...kaynak, ...secilen, ...denetle(alan, secilen, bugun) });
     }
   }
   return rapor;

@@ -46,8 +46,12 @@ değerin üzerine yazılmaz, yalnız boş alanlar doldurulur; yazım öncesi ve 
 çalışır. Kaynak biçim değiştirmişse ayrıştırıcı hata döndürür, dosyaya dokunulmaz.
 
 Kaynaklar `KAYNAKLAR` sabitinde sırayla denenir; yenisini eklemek bir satır ve bir ayrıştırıcıdır.
-HSFO'nun bilinen ücretsiz günlük kaynağı yok: sözleşme yalnız gün sonu uzlaşması yayımlıyor ve
-hacmi çok düşük. O alan şimdilik elle giriliyor.
+Gasoil ve HSFO, CME'nin nakit uzlaşan Avrupa sözleşmeleri üzerinden alınır (`7F` ve `UV`); vade
+sembolü aya göre değiştiği için önümüzdeki üç vade denenir, roll döneminde biri yanıt verir.
+
+**Borsa serilerinde bugünün barı elenir.** Gün içi bir değer uzlaşma yerine kaydedilirse koridor
+ortalaması sahte olur. `kur` bu kuralın dışındadır: Merkez Bankası kuru o gün için resmî olarak
+ilan edilir, kapanış beklemez.
 
 Hangi kaynağın çalıştığı ağa göre değişir (bazı siteler bulut IP'lerini engeller). Cron'a
 bağlamadan önce kendi makinende ve bir kez de GitHub Actions üzerinde deneme kipinde çalıştır.
