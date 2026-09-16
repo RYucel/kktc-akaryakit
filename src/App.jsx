@@ -4,6 +4,7 @@ import { SABIT, hesapla, ortukCif } from "./hesap.js";
 import yerlesikVeri from "../public/data/piyasa.json";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "./piyasa.js";
 import { PIYASA_KAYNAKLARI } from "./piyasaKaynaklari.js";
+import { koridorDurumu, PENCERE_GUN } from "./koridor.js";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine,
   ResponsiveContainer, CartesianGrid,
@@ -900,6 +901,24 @@ function ZamRadari({ nakliye, onIncele }) {
   const siraliKayit = useMemo(() => [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih)), [kayitlar]);
   const farkBenzin = farkHesapla(siraliKayit, "b95", "eurobob", bugun);
   const farkDizel = farkHesapla(siraliKayit, "dz", "gasoil", bugun);
+  // Tüzük md. 5: pencere, tavanın uygulamaya konulduğu günde başlar; önceki günler sayılmaz.
+  const koridorlar = ["b95", "dz"].map((k) => {
+    const u = URUNLER[k];
+    const gunler = gecerli
+      .filter((x) => x.tarih >= KARAR.resmiFiyatTarihi && x[k] != null)
+      .map((x) => ({ tarih: x.tarih, cif: x[k], kur: gununKuru(x.tarih), tahmini: x.tahmini.includes(k) }));
+    return {
+      k,
+      ad: u.ad,
+      d: koridorDurumu({
+        gunler,
+        bazCif: ortukCif(u, VARSAYILAN_KUR, KURALLAR.bugun.ayar, VARSAYILAN_NAKLIYE),
+        bazKur: VARSAYILAN_KUR,
+        yogunluk: u.yogunluk,
+      }),
+    };
+  });
+
   const paketBitti = bugun >= KARAR.paketBitis || bugun > KARAR.harcMuafiyetiSonGun;
   const paketBitiyor = !paketBitti && gunFarki(KARAR.paketBitis, bugun) <= 3;
 
@@ -1059,6 +1078,49 @@ Respond with ONLY this JSON object, no markdown, no commentary:
               : <span style={{ color: T.mute }}>henüz hesaplanamadı. Aynı gün için hem {cift} değerini gir.</span>}
           </div>
         ))}
+      </div>
+      <div className="mt-4 rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.cizgi}` }}>
+        <div className="font-semibold">Fiyat değişim koridoru</div>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: T.mute }}>
+          Tüzük md. 5: tavanın uygulamaya konulduğu günden başlayarak hesaplanan son {PENCERE_GUN} günün
+          İthal Parite Fiyatı ortalaması, md. 2'deki ±%3 koridorunun dışına çıkarsa ithalatçılar tavanı
+          yeniden belirler; md. 6 uyarınca en geç 24 saat içinde emirname ile ilan edilir. Koşul gerçekleşse
+          de fiyat ayrı bir kararla dondurulabilir.
+        </p>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {koridorlar.map(({ k, ad, d }) => {
+            if (!d) return (
+              <div key={k} className="rounded-lg px-3 py-2 text-sm" style={{ background: T.yuzey, border: `1px solid ${T.cizgi}` }}>
+                <span className="font-medium">{ad}: </span><span style={{ color: T.mute }}>baz fiyat okunamadı.</span>
+              </div>
+            );
+            const rozet = { ust: ["Koridor aşıldı", T.artis], alt: ["Koridorun altında", T.azalis], icinde: ["Koridor içinde", T.mute], veriyok: ["Veri yok", T.mute] }[d.durum];
+            return (
+              <div key={k} className="rounded-lg px-3 py-2 text-sm" style={{ background: T.yuzey, border: `1px solid ${d.durum === "icinde" || d.durum === "veriyok" ? T.cizgi : rozet[1]}` }}>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                  <span className="font-medium">{ad}</span>
+                  <span className="text-xs font-semibold" style={{ color: rozet[1] }}>{rozet[0]}</span>
+                </div>
+                <div className="mt-1 text-xs leading-relaxed" style={{ color: T.mute }}>
+                  Baz İPF {tl(d.baz)} TL/L · koridor {tl(d.alt)} – {tl(d.ust)} TL/L
+                </div>
+                {d.ortalama == null ? (
+                  <div className="mt-1 text-xs" style={{ color: T.mute }}>
+                    {KARAR.resmiFiyatTarihi} sonrası için CIF ve kur girilmemiş.
+                  </div>
+                ) : (
+                  <div className="mt-1 text-xs leading-relaxed">
+                    <span className="font-semibold" style={{ color: T.ink }}>{tl(d.ortalama)} TL/L</span>{" "}
+                    <span style={{ color: T.mute }}>
+                      ({d.gun} günün ortalaması{d.tahminiGun ? `, ${d.tahminiGun}'i türetilmiş` : ""}; baza göre {isaretli(d.sapma * 100)}%
+                      {d.durum === "ust" || d.durum === "alt" ? `, banttan ${isaretli(d.asim * 100)}%` : ""})
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
       <p className="mt-3 text-xs leading-relaxed" style={{ color: T.mute }}>
         Bu bir koşullu senaryo, resmi karar veya kesin tahmin değil. Her günün fiyatı o günün kuruyla TL'ye çevrilip ortalaması alınıyor

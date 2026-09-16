@@ -106,6 +106,21 @@ Tüzük zam tetikleyicisini sayısal olarak tanımlar:
   Dini, milli, resmi, idari ve hafta sonu tatillerine isabet eden günlerde bu işlem yapılmaz.
 - **md. 6** — Bilgi verildikten sonra **en geç 24 saat** içinde Ekonomi Bakanlığı emirname ile ilan eder.
 
+`src/koridor.js` bunu hesaplar: her günün İPF'si (CIF × yoğunluk ÷ 1000 × o günün kuru, TL/litre),
+son fiyat kararından bu yana yürüyen ortalama, ±%3 bandı, baza göre sapma ve banttan aşım.
+Pencere fiyatın yürürlüğe girdiği günde başlar (md. 5: "önceki günler hesaba alınmaksızın").
+Zam radarında Benzin 95 ve Euro Diesel için ayrı ayrı gösterilir.
+
+Göstergenin okunuşunda iki sınır var:
+
+- **Koşul ≠ karar.** Koridorun aşılmış olması emirnameyi zorunlu kılar ama fiyat Fon'la veya
+  ayrı bir kararla dondurulabilir; Nisan'da olduğu gibi.
+- **Türetilmiş gün sayısına bak.** Kartta kaç günün türetildiği yazar. Dizel CIF Med ile gasoil
+  aynı güne birlikte girilmediyse Akdeniz farkı kalibre edilemez ve dizel, Brent değişiminden
+  türetilir. Distile krizinde Brent kötü bir vekildir: gasoil'in Brent'ten koptuğu dönemde bu
+  yöntem CIF'i yüzlerce dolar düşük tahmin eder ve koridor sinyali olduğundan zayıf görünür.
+  Bandın kenarındaki bir sonucu, türetilmiş günler ağırlıktaysa kesin sayma.
+
 ## Pompa fiyatı ile hesap modelinin farkı
 
 ### Kişisel piyasa günlüğü için kaynaklar
