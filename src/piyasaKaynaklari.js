@@ -39,6 +39,11 @@ export const PIYASA_KAYNAKLARI = {
     erisim: "Ücretsiz ve günlük. Amerikan pazarıdır; Akdeniz dizeline gasoil kadar yakın değildir ama aynı ürün ailesidir (orta distilat) ve Brent'ten çok daha iyi bir vekildir. Gasoil elde varsa o tercih edilir.",
     linkler: [{ ad: "Heating Oil vadeli fiyatları", url: "https://finance.yahoo.com/quote/HO%3DF/" }],
   },
+  rb: {
+    aciklama: "NYMEX RBOB Gasoline en yakın vade kapanışı, Yahoo sembolü RB=F; USD/GALON. Ton değil galon girilir, çevrimi uygulama yapar (benzinde 1 ton = 340,63 galon).",
+    erisim: "Ücretsiz ve günlük. Eurobob'un ücretsiz günlük kaynağı bulunamadığı için benzinin otomatik vekili budur; ho'nun dizel için yaptığı işi benzin için yapar. Amerikan pazarıdır, Akdeniz benzinine Eurobob kadar yakın değildir ama aynı ürün ailesidir ve Brent'ten çok daha iyi bir vekildir. Eurobob elde varsa o tercih edilir.",
+    linkler: [{ ad: "RBOB vadeli fiyatları", url: "https://finance.yahoo.com/quote/RB%3DF/" }],
+  },
   brent: {
     aciklama: "Brent Oil vadeli fiyatı; USD/varil. Daily (günlük) tabloda ilgili günün Price (kapanış) değerini al. WTI veya benzin fiyatını seçme.",
     erisim: "Investing.com gösterge verisidir; borsanın resmî uzlaşması için ICE raporunu kullan. Aynı vade serisini izle; Brent yalnız yaklaşık tahminde kullanılır.",

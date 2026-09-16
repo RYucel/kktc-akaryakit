@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { farkHesapla, pencereFarki, turet, gunlukBirlestir, GALON_TON } from "../src/tahmin.js";
+import { farkHesapla, pencereFarki, turet, gunlukBirlestir, GALON_TON_DIZEL, GALON_TON_BENZIN } from "../src/tahmin.js";
 
 test("future calibration pairs cannot affect older estimates", () => {
   const rows = [{ tarih: "2026-09-10", eurobob: 1400 }, { tarih: "2026-09-11", eurobob: 1410, b95: 1500 }];
@@ -147,7 +147,7 @@ test("türetilmiş çapa varken turet pencere yolunu kullanır, günlük yolu de
 });
 
 test("NY ULSD galon fiyatı tona çevrilerek vekil olarak kullanılır", () => {
-  assert.ok(Math.abs(GALON_TON - 1000 / 0.845 / 3.785411784) < 1e-9);
+  assert.ok(Math.abs(GALON_TON_DIZEL - 1000 / 0.845 / 3.785411784) < 1e-9);
   const rows = [
     { tarih: "2026-09-04", ho: 4.20 },
     { tarih: "2026-09-07", ho: 4.38 },
@@ -158,8 +158,8 @@ test("NY ULSD galon fiyatı tona çevrilerek vekil olarak kullanılır", () => {
   const gunler = ["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"];
   const son = turet(rows, { gunler }).at(-1);
   assert.equal(son.yontem.dz, "hoPencere");
-  const pencereOrt = ((4.20 + 4.38 + 4.31 + 4.44) / 4) * GALON_TON;
-  assert.ok(Math.abs(son.dz - (4.95 * GALON_TON + (1351.3 - pencereOrt))) < 1e-9);
+  const pencereOrt = ((4.20 + 4.38 + 4.31 + 4.44) / 4) * GALON_TON_DIZEL;
+  assert.ok(Math.abs(son.dz - (4.95 * GALON_TON_DIZEL + (1351.3 - pencereOrt))) < 1e-9);
 });
 
 test("gasoil varsa NY ULSD'ye düşülmez", () => {
@@ -178,4 +178,48 @@ test("hiç vekil yoksa Brent'e düşülür", () => {
     { tarih: "2026-09-16", brent: 108.09 },
   ];
   assert.equal(turet(rows, { gunler: ["2026-09-09"] }).at(-1).yontem.dz, "brent");
+});
+
+test("Eurobob yoksa benzin RBOB'dan türetilir, Brent'e düşmez", () => {
+  // Benzin yoğunluğu dizelden farklı: çevrim katsayısı da farklı olmalı.
+  assert.ok(Math.abs(GALON_TON_BENZIN - 1000 / 0.775 / 3.785411784) < 1e-9);
+  assert.ok(GALON_TON_BENZIN > GALON_TON_DIZEL, "hafif üründe tonda daha çok galon var");
+  const rows = [
+    { tarih: "2026-09-04", rb: 3.10, brent: 100 },
+    { tarih: "2026-09-07", rb: 3.22, brent: 101 },
+    { tarih: "2026-09-08", rb: 3.18, brent: 102 },
+    { tarih: "2026-09-09", rb: 3.30, brent: 103, b95: 1492.6, tahminiAlanlar: ["b95"] },
+    { tarih: "2026-09-16", rb: 3.4652, brent: 108.09 },
+  ];
+  const gunler = ["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"];
+  const son = turet(rows, { gunler }).at(-1);
+  assert.equal(son.yontem.b95, "rbPencere");            // Brent çapası varken bile RBOB kazanır
+  const pencereOrt = ((3.10 + 3.22 + 3.18 + 3.30) / 4) * GALON_TON_BENZIN;
+  assert.ok(Math.abs(son.b95 - (3.4652 * GALON_TON_BENZIN + (1492.6 - pencereOrt))) < 1e-9);
+});
+
+test("Eurobob varsa RBOB'a düşülmez", () => {
+  const rows = [
+    { tarih: "2026-09-04", eurobob: 1400, rb: 3.10 },
+    { tarih: "2026-09-09", eurobob: 1450, rb: 3.30, b95: 1492.6, tahminiAlanlar: ["b95"] },
+    { tarih: "2026-09-16", eurobob: 1520, rb: 3.4652 },
+  ];
+  const son = turet(rows, { gunler: ["2026-09-04", "2026-09-09"] }).at(-1);
+  assert.equal(son.yontem.b95, "eurobobPencere");
+});
+
+test("benzin ve dizel galon vekilleri birbirinin katsayısını kullanmaz", () => {
+  const rows = [
+    { tarih: "2026-09-04", rb: 3.10, ho: 4.20 },
+    { tarih: "2026-09-09", rb: 3.30, ho: 4.44, b95: 1492.6, dz: 1351.3, tahminiAlanlar: ["b95", "dz"] },
+    { tarih: "2026-09-16", rb: 3.4652, ho: 4.95 },
+  ];
+  const gunler = ["2026-09-04", "2026-09-09"];
+  const son = turet(rows, { gunler }).at(-1);
+  assert.equal(son.yontem.b95, "rbPencere");
+  assert.equal(son.yontem.dz, "hoPencere");
+  const bOrt = ((3.10 + 3.30) / 2) * GALON_TON_BENZIN;
+  const dOrt = ((4.20 + 4.44) / 2) * GALON_TON_DIZEL;
+  assert.ok(Math.abs(son.b95 - (3.4652 * GALON_TON_BENZIN + (1492.6 - bOrt))) < 1e-9);
+  assert.ok(Math.abs(son.dz - (4.95 * GALON_TON_DIZEL + (1351.3 - dOrt))) < 1e-9);
 });

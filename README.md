@@ -58,6 +58,7 @@ Doğru sembolü tahmin etmek yerine sordurmak için `--ara <terim>` kipi vardır
 | `kur` | KKTC Merkez Bankası, USD Döviz Satış |
 | `brent` | Yahoo `BZ=F` |
 | `ho` | Yahoo `HO=F` (NY Harbor ULSD), vade sembolleriyle birlikte |
+| `rb` | Yahoo `RB=F` (RBOB benzin), vade sembolleriyle birlikte |
 | `gasoil`, `hsfo`, `eurobob` | **yok — elle girilir** |
 
 ICE gasoil ve Avrupa HSFO'nun ücretsiz günlük kaynağı bulunamadı. Yahoo'da yalnız S&P GSCI
@@ -157,9 +158,19 @@ Hesap modelinin oranları **2001 Petrol Ürünlerinin Fiyatlandırma Esasların�
 
 ### Akdeniz farkının iki kalibrasyon yolu
 
-CIF Med kotasyonları abonelik ürünüdür; çoğu gün elde olmaz. Model bu yüzden vekil seri
-kullanır (benzinde Eurobob, dizelde gasoil) ve aradaki **Akdeniz farkı**nı kalibre etmeye
-çalışır. İki yol var, bu sırayla denenir:
+CIF Med kotasyonları abonelik ürünüdür; çoğu gün elde olmaz. Model bu yüzden vekil seri kullanır
+ve aradaki **Akdeniz farkı**nı kalibre etmeye çalışır. Vekil sırası ürüne göre:
+
+| Ürün | 1. vekil | 2. vekil | son çare |
+| --- | --- | --- | --- |
+| Benzin | Eurobob (elle) | **RBOB `rb`** (ücretsiz, otomatik) | Brent |
+| Dizel | gasoil (elle) | NY ULSD `ho` (ücretsiz, otomatik) | Brent |
+
+İkinci vekiller galon cinsinden kote edilir ve kalibrasyon öncesi tona çevrilir; katsayı ürünün
+yoğunluğundan gelir (dizelde 312,66, benzinde 340,63 galon/ton). Amerikan pazarıdır, Akdeniz'e
+birinci vekiller kadar yakın değildir ama aynı ürün ailesidir ve Brent'ten belirgin biçimde iyidir.
+
+Farkın kendisi iki yoldan kalibre edilir, bu sırayla:
 
 1. **Günlük eşleşme** — aynı güne hem CIF Med hem vekil **gözlenmişse** son 5 çiftin ortalama
    farkı. En güvenilir yol. Resmî fiyattan geriye hesaplanan CIF bu yola girmez: o değer günlük
@@ -181,10 +192,15 @@ CIF'i yüzlerce dolar düşük tahmin eder, zam radarı ve koridor göstergesi o
 Kartlarda kaç günün hangi yöntemle türetildiği yazar; "Brent değişiminden" ibaresini gördüğünde
 sayılara temkinli yaklaş.
 
-**Pencere kalibrasyonunu açmak için** resmî fiyatın yürürlük tarihinden önceki 15 güne birkaç
-gün vekil değeri (gasoil / Eurobob) gir. Bu seriler
-[herkese açık](https://www.investing.com/commodities/london-gas-oil-historical-data), CIF Med
-gibi abonelik gerektirmez. Hedef tarafta zaten resmî fiyattan türetilmiş CIF duruyor.
+**Pencere kalibrasyonunu açmak için** resmî fiyatın yürürlük tarihinden önceki 15 güne birkaç gün
+vekil değeri gir. Hedef tarafta zaten resmî fiyattan türetilmiş CIF duruyor. `rb` ve `ho` bu
+günlere toplayıcı tarafından kendiliğinden yazılır; elle girmek istersen gasoil
+[herkese açık](https://www.investing.com/commodities/london-gas-oil-historical-data), CIF Med gibi
+abonelik gerektirmez.
+
+Eurobob'un ücretsiz günlük kaynağı aranıp bulunamadı: Yahoo Avrupa rafineri ürünü sözleşmelerini
+hiç taşımıyor (`7F` gasoil ve `7H`/`EBB` Eurobob kökleri 404 döner), Argus rakam yayımlamıyor,
+ICE/CME/Barchart sayfaları JavaScript'le yükleniyor. Benzinin otomatik vekili bu yüzden RBOB.
 
 ### Fiyat değişim koridoru (md. 2, 5 ve 6)
 

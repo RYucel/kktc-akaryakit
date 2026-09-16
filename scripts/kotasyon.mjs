@@ -7,6 +7,7 @@
 //   node scripts/kotasyon.mjs                 # rapor
 //   node scripts/kotasyon.mjs --yaz           # doğrulananları piyasa.json'a işle
 //   node scripts/kotasyon.mjs --alan gasoil   # tek alanı dene
+//   node scripts/kotasyon.mjs --yaz --gecmis  # serinin tamamını boş günlere işle (bir kerelik)
 //
 // Disiplin gazete.py ile aynı: şüpheli değeri asla yazma. Kaynak biçim değiştirmiş,
 // tarih uyuşmuyor ya da değer olağan aralığın dışındaysa dosyaya dokunmadan çık.
@@ -15,14 +16,17 @@ import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "../src/piyasa.js";
 
-export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], brent: [20, 300], kur: [10, 200] };
+export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], rb: [0.5, 20], brent: [20, 300], kur: [10, 200] };
 
 // Kaynaklar kayan nokta artığı döndürebiliyor (Yahoo float32: 5.26200008392334). Bu dosya
 // elle de düzenleniyor; değerler alanın gerçek hassasiyetine yuvarlanarak yazılır.
-export const BASAMAK = { gasoil: 2, hsfo: 3, ho: 4, brent: 2, kur: 4 };
+export const BASAMAK = { gasoil: 2, hsfo: 3, ho: 4, rb: 4, brent: 2, kur: 4 };
 export const yuvarla = (alan, deger) => Number(deger.toFixed(BASAMAK[alan] ?? 4));
 
 export const MAKS_YAS_GUN = 5;
+// Geçmiş doldurma kipinde daha eski günler kabul edilir: kalibrasyon penceresi resmî fiyatın
+// yürürlük tarihinden öncesine bakar, oradaki günler doğal olarak MAKS_YAS_GUN'den eskidir.
+export const GECMIS_YAS_GUN = 45;
 const ZAMAN_ASIMI_MS = 15000;
 const UA = "kktc-akaryakit/1.0 (+https://github.com/RYucel/kktc-akaryakit)";
 
@@ -82,7 +86,18 @@ export function yahooChart(metin) {
 
 // Borsa serilerinde bugünün barı henüz kapanmamıştır; kapanış diye kaydedilirse
 // gün içi bir değer uzlaşma yerine geçer. Bu yüzden kapanmamış gün elenir.
-export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo", "ho"]);
+export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo", "ho", "rb"]);
+
+// Yahoo tek istekte bir aylık seri döndürüyor; geçmiş doldurma kipi bunun tamamını kullanır.
+// Kalibrasyon penceresi ancak böyle dolar: canlı koşu yalnız son kapanmış günü yazabilir.
+export function seriSec(sonuc, alan, bugun, maksYas = GECMIS_YAS_GUN) {
+  if (sonuc.hata) return [];
+  const seri = sonuc.seri || (sonuc.deger != null ? [{ tarih: sonuc.tarih, deger: sonuc.deger }] : []);
+  const uygun = KAPANMIS_GUN_GEREKIR.has(alan) ? seri.filter((x) => x.tarih && x.tarih < bugun) : seri;
+  return uygun
+    .map((x) => ({ ...x, deger: typeof x.deger === "number" ? yuvarla(alan, x.deger) : x.deger }))
+    .filter((x) => denetle(alan, x, bugun, maksYas).durum === "kabul");
+}
 
 export function sec(sonuc, alan, bugun) {
   if (sonuc.hata) return sonuc;
@@ -147,6 +162,12 @@ export const KAYNAKLAR = {
     { ad: "Yahoo HO=F", url: yahoo("HO=F", "1mo"), ayristir: yahooChart },
     ...vadeSembolleri(kktcBugun(), "HO").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
   ],
+  // Eurobob'un da ücretsiz günlük kaynağı yok (Yahoo'da Avrupa ürün sözleşmeleri hiç taşınmıyor;
+  // 7F gasoil ve 7H/EBB Eurobob kökleri 404 döner). Benzinin otomatik vekili bu yüzden RBOB.
+  rb: [
+    { ad: "Yahoo RB=F", url: yahoo("RB=F", "1mo"), ayristir: yahooChart },
+    ...vadeSembolleri(kktcBugun(), "RB").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
+  ],
 };
 
 /* ---------------------------------------------------------------- */
@@ -188,7 +209,7 @@ export function kayitlariIsle(veri, kabul) {
 
 /* ---------------------------------------------------------------- */
 
-export function denetle(alan, sonuc, bugun) {
+export function denetle(alan, sonuc, bugun, maksYas = MAKS_YAS_GUN) {
   if (sonuc.hata) return { durum: "hata", neden: sonuc.hata };
   const [min, max] = ARALIK[alan];
   if (!(typeof sonuc.deger === "number" && Number.isFinite(sonuc.deger))) return { durum: "red", neden: "sayı değil" };
@@ -197,7 +218,7 @@ export function denetle(alan, sonuc, bugun) {
   if (!tarihGecerli(sonuc.tarih)) return { durum: "red", neden: `tarih geçersiz: ${sonuc.tarih}` };
   if (sonuc.tarih > bugun) return { durum: "red", neden: "gelecek tarih" };
   const yas = Math.round((Date.parse(bugun) - Date.parse(sonuc.tarih)) / 86400000);
-  if (yas > MAKS_YAS_GUN) return { durum: "red", neden: `${yas} gün eski` };
+  if (yas > maksYas) return { durum: "red", neden: `${yas} gün eski` };
   return { durum: "kabul", neden: "" };
 }
 
@@ -222,9 +243,11 @@ export async function topla(alanlar, bugun) {
     for (const kaynak of KAYNAKLAR[alan] || []) {
       const cevap = await getir(kaynak.url);
       if (cevap.hata) { rapor[alan].push({ ...kaynak, durum: "hata", neden: cevap.hata }); continue; }
-      const secilen = sec(kaynak.ayristir(cevap.metin), alan, bugun);
+      const ayristirilmis = kaynak.ayristir(cevap.metin);
+      const secilen = sec(ayristirilmis, alan, bugun);
       if (typeof secilen.deger === "number" && Number.isFinite(secilen.deger)) secilen.deger = yuvarla(alan, secilen.deger);
-      rapor[alan].push({ ...kaynak, ...secilen, ...denetle(alan, secilen, bugun) });
+      const seriKabul = seriSec(ayristirilmis, alan, bugun);
+      rapor[alan].push({ ...kaynak, ...secilen, ...denetle(alan, secilen, bugun), seriKabul });
     }
   }
   return rapor;
@@ -263,21 +286,31 @@ async function main() {
     return;
   }
   const yaz = argv.includes("--yaz");
+  const gecmis = argv.includes("--gecmis");
   const i = argv.indexOf("--alan");
   const alanlar = i >= 0 && argv[i + 1] ? [argv[i + 1]] : Object.keys(KAYNAKLAR);
   const bilinmeyen = alanlar.filter((a) => !(a in KAYNAKLAR));
   if (bilinmeyen.length) { console.error(`Bilinmeyen alan: ${bilinmeyen.join(", ")}`); process.exit(2); }
 
   const bugun = kktcBugun();
-  console.log(`Kotasyon taraması — ${bugun}${yaz ? "" : "  (deneme kipi, dosya değişmez)"}`);
+  console.log(`Kotasyon taraması — ${bugun}${gecmis ? "  (geçmiş doldurma)" : ""}${yaz ? "" : "  (deneme kipi, dosya değişmez)"}`);
   const rapor = await topla(alanlar, bugun);
   yazdir(rapor);
 
-  const kabul = Object.entries(rapor)
-    .map(([alan, d]) => [alan, d.find((x) => x.durum === "kabul")])
-    .filter(([, x]) => x);
-  console.log(`\n${kabul.length}/${alanlar.length} alan için doğrulanmış değer bulundu.`);
-  if (!yaz) { console.log("Yazmak için: node scripts/kotasyon.mjs --yaz"); return; }
+  // Geçmiş kipinde ilk çalışan kaynağın tüm serisi yazılır; normalde yalnız son kapanmış gün.
+  const kabul = [];
+  for (const [alan, denemeler] of Object.entries(rapor)) {
+    if (gecmis) {
+      const ilk = denemeler.find((x) => x.seriKabul?.length);
+      if (ilk) for (const g of ilk.seriKabul) kabul.push([alan, { ...g, ad: ilk.ad, url: ilk.url }]);
+    } else {
+      const x = denemeler.find((d) => d.durum === "kabul");
+      if (x) kabul.push([alan, x]);
+    }
+  }
+  const alanSayisi = new Set(kabul.map(([a]) => a)).size;
+  console.log(`\n${alanSayisi}/${alanlar.length} alan için doğrulanmış değer bulundu${gecmis ? ` (${kabul.length} gün)` : ""}.`);
+  if (!yaz) { console.log(`Yazmak için: node scripts/kotasyon.mjs --yaz${gecmis ? " --gecmis" : ""}`); return; }
   if (!kabul.length) { console.log("Yazılacak değer yok; dosyaya dokunulmadı."); return; }
 
   const yol = new URL("../public/data/piyasa.json", import.meta.url);

@@ -747,7 +747,7 @@ function aktifPencere(simdi = isodanTarih(bugunIso())) {
 // o da yoksa en yakın önceki kayıttan Brent değişimi.
 
 
-const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", eurobobPencere: "Eurobob ve resmî pencere farkından", gasoilPencere: "gasoil ve resmî pencere farkından", ho: "NY ULSD ve Akdeniz farkından", hoPencere: "NY ULSD ve resmî pencere farkından", brent: "Brent değişiminden", model: "resmî fiyattan geriye hesapla" };
+const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", eurobobPencere: "Eurobob ve resmî pencere farkından", gasoilPencere: "gasoil ve resmî pencere farkından", ho: "NY ULSD ve Akdeniz farkından", hoPencere: "NY ULSD ve resmî pencere farkından", rb: "RBOB ve Akdeniz farkından", rbPencere: "RBOB ve resmî pencere farkından", brent: "Brent değişiminden", model: "resmî fiyattan geriye hesapla" };
 function yontemMetni(yontemler) {
   const say = {};
   for (const y of yontemler) say[y] = (say[y] || 0) + 1;
@@ -755,9 +755,9 @@ function yontemMetni(yontemler) {
 }
 
 // İnternetten gelen her değer tek tek denetlenir
-const ETIKET = { b95: "Benzin CIF Med", dz: "Dizel CIF Med", eurobob: "Eurobob vadeli", gasoil: "Gasoil vadeli", hsfo: "HSFO 3,5% vadeli", ho: "NY ULSD (HO)", brent: "Brent", kur: "Dolar" };
-const BIRIM = { b95: "$/t", dz: "$/t", eurobob: "$/t", gasoil: "$/t", hsfo: "$/t", ho: "$/galon", brent: "$/varil", kur: "TL" };
-const ARALIK = { b95: [300, 3000], dz: [300, 3000], eurobob: [300, 3000], gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], brent: [20, 300], kur: [10, 200] };
+const ETIKET = { b95: "Benzin CIF Med", dz: "Dizel CIF Med", eurobob: "Eurobob vadeli", gasoil: "Gasoil vadeli", hsfo: "HSFO 3,5% vadeli", ho: "NY ULSD (HO)", rb: "RBOB (RB)", brent: "Brent", kur: "Dolar" };
+const BIRIM = { b95: "$/t", dz: "$/t", eurobob: "$/t", gasoil: "$/t", hsfo: "$/t", ho: "$/galon", rb: "$/galon", brent: "$/varil", kur: "TL" };
+const ARALIK = { b95: [300, 3000], dz: [300, 3000], eurobob: [300, 3000], gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], rb: [0.5, 20], brent: [20, 300], kur: [10, 200] };
 const MAKS_YAS = 3;
 function degerDenetle(alan, v, bugun) {
   const deger = typeof v?.deger === "number" && Number.isFinite(v.deger) ? v.deger : null;
@@ -822,7 +822,7 @@ const depo = {
   },
 };
 
-const BOS_FORM = { tarih: "", b95: "", dz: "", eurobob: "", gasoil: "", hsfo: "", ho: "", brent: "", kur: "", not: "" };
+const BOS_FORM = { tarih: "", b95: "", dz: "", eurobob: "", gasoil: "", hsfo: "", ho: "", rb: "", brent: "", kur: "", not: "" };
 const ESKI_VERI_GUN = 10;
 
 function ZamRadari({ nakliye, onIncele }) {
@@ -943,6 +943,7 @@ eurobob: Eurobob (Euro-bob Oxy NWE barges) gasoline front-month futures on ICE o
 gasoil: ICE Low Sulphur Gasoil front-month futures, USD per metric ton.
 hsfo: European 3.5% Fuel Oil Barges FOB Rotterdam (Platts) front-month futures (NYMEX code UV), USD per metric ton. This is high sulphur fuel oil, not gasoil and not VLSFO.
 ho: NYMEX Heating Oil (NY Harbor ULSD) front-month futures, USD per GALLON (not per ton).
+rb: NYMEX RBOB Gasoline front-month futures, USD per GALLON (not per ton). This is US gasoline, not Eurobob.
 brent: ICE Brent front-month futures, USD per barrel.
 kur: USD/TRY exchange rate.
 Rules:
@@ -951,7 +952,7 @@ Rules:
 - Ignore sources older than 3 days before today. Old reports and archived documents are common for these terms; do not use them.
 - Give the exact URL where the number appears.
 Respond with ONLY this JSON object, no markdown, no commentary:
-{"b95":${alanSablonu},"dz":${alanSablonu},"eurobob":${alanSablonu},"gasoil":${alanSablonu},"hsfo":${alanSablonu},"ho":${alanSablonu},"brent":${alanSablonu},"kur":${alanSablonu},"not":"one short sentence in Turkish on what was and was not found"}`;
+{"b95":${alanSablonu},"dz":${alanSablonu},"eurobob":${alanSablonu},"gasoil":${alanSablonu},"hsfo":${alanSablonu},"ho":${alanSablonu},"rb":${alanSablonu},"brent":${alanSablonu},"kur":${alanSablonu},"not":"one short sentence in Turkish on what was and was not found"}`;
     try {
       const yanit = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -1211,7 +1212,7 @@ Respond with ONLY this JSON object, no markdown, no commentary:
             </p>
           </div>
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[["tarih", "Tarih", "date"], ["b95", "Benzin CIF Med ($/t)"], ["dz", "Dizel CIF Med ($/t)"], ["eurobob", "Eurobob vadeli ($/t)"], ["gasoil", "Gasoil vadeli ($/t)"], ["hsfo", "HSFO 3,5% vadeli ($/t)"], ["ho", "NY ULSD / Heating Oil ($/galon)"], ["brent", "Brent ($/varil)"], ["kur", "Dolar (TL)"]].map(([a, et, tip]) => {
+            {[["tarih", "Tarih", "date"], ["b95", "Benzin CIF Med ($/t)"], ["dz", "Dizel CIF Med ($/t)"], ["eurobob", "Eurobob vadeli ($/t)"], ["gasoil", "Gasoil vadeli ($/t)"], ["hsfo", "HSFO 3,5% vadeli ($/t)"], ["ho", "NY ULSD / Heating Oil ($/galon)"], ["rb", "RBOB benzin ($/galon)"], ["brent", "Brent ($/varil)"], ["kur", "Dolar (TL)"]].map(([a, et, tip]) => {
               const kaynak = PIYASA_KAYNAKLARI[a];
               return (
                 <div key={a} className="min-w-0 text-sm">
@@ -1266,6 +1267,7 @@ Respond with ONLY this JSON object, no markdown, no commentary:
                 <th className="py-2 pr-3 text-right font-medium">Gasoil</th>
                 <th className="py-2 pr-3 text-right font-medium">HSFO</th>
                 <th className="py-2 pr-3 text-right font-medium">NY ULSD</th>
+                <th className="py-2 pr-3 text-right font-medium">RBOB</th>
                 <th className="py-2 pr-3 text-right font-medium">Brent</th>
                 <th className="py-2 pr-3 text-right font-medium">Dolar</th>
                 <th className="py-2 pr-3 text-left font-medium">Kaynak</th>
@@ -1286,6 +1288,7 @@ Respond with ONLY this JSON object, no markdown, no commentary:
                   <td className="py-2 pr-3 text-right">{k.gasoil == null ? "–" : tl(k.gasoil, 0)}</td>
                   <td className="py-2 pr-3 text-right">{k.hsfo == null ? "–" : tl(k.hsfo, 0)}</td>
                   <td className="py-2 pr-3 text-right">{k.ho == null ? "–" : tl(k.ho, 3)}</td>
+                  <td className="py-2 pr-3 text-right">{k.rb == null ? "–" : tl(k.rb, 3)}</td>
                   <td className="py-2 pr-3 text-right">{k.brent == null ? "–" : tl(k.brent)}</td>
                   <td className="py-2 pr-3 text-right">{k.kur == null ? "–" : tl(k.kur)}</td>
                   <td className="py-2 pr-3" style={{ color: T.mute }} title={(k.notlar || []).join(" ")}>

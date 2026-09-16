@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mbKur, stooqCsv, yahooChart, yahooArama, sec, denetle, vadeSembolleri, kayitlariIsle, yuvarla, ARALIK, BASAMAK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
+import { mbKur, stooqCsv, yahooChart, yahooArama, sec, seriSec, denetle, vadeSembolleri, kayitlariIsle, yuvarla, ARALIK, BASAMAK, KAYNAKLAR, MAKS_YAS_GUN, GECMIS_YAS_GUN } from "../scripts/kotasyon.mjs";
 
 const BUGUN = "2026-09-16";
 
@@ -126,4 +126,39 @@ test("değerler alanın hassasiyetine yuvarlanır", () => {
   assert.equal(yuvarla("brent", 108.7500114), 108.75);
   assert.equal(yuvarla("kur", 48.64600000001), 48.646);
   for (const alan of Object.keys(ARALIK)) assert.equal(typeof BASAMAK[alan], "number", `${alan} için basamak yok`);
+});
+
+test("seriSec serinin tamamını verir; sec yalnız son kapanmış günü", () => {
+  const sonuc = { seri: [
+    { tarih: "2026-09-04", deger: 3.10 },
+    { tarih: "2026-09-08", deger: 3.1800000123 },
+    { tarih: "2026-09-15", deger: 3.4652 },
+    { tarih: "2026-09-16", deger: 3.50 },      // bugün: kapanmamış
+  ] };
+  assert.equal(sec(sonuc, "rb", BUGUN).tarih, "2026-09-15");
+  const seri = seriSec(sonuc, "rb", BUGUN);
+  assert.deepEqual(seri.map((x) => x.tarih), ["2026-09-04", "2026-09-08", "2026-09-15"]);
+  assert.equal(seri[1].deger, 3.18, "geçmiş günler de yuvarlanmalı");
+});
+
+test("geçmiş doldurma kalibrasyon penceresine yetecek kadar geriye bakar", () => {
+  // Kalibrasyon penceresi resmî fiyattan öncesine bakar: o günler MAKS_YAS_GUN'den eskidir.
+  assert.ok(GECMIS_YAS_GUN > MAKS_YAS_GUN);
+  const eski = { deger: 3.10, tarih: "2026-09-04" };                 // 12 gün önce
+  assert.equal(denetle("rb", eski, BUGUN).durum, "red");             // canlı koşuda elenir
+  assert.equal(denetle("rb", eski, BUGUN, GECMIS_YAS_GUN).durum, "kabul");
+  const cokEski = { deger: 3.10, tarih: "2026-01-02" };
+  assert.equal(denetle("rb", cokEski, BUGUN, GECMIS_YAS_GUN).durum, "red");
+  assert.deepEqual(seriSec({ seri: [cokEski] }, "rb", BUGUN), []);
+});
+
+test("geçmiş doldurma mevcut değerin üzerine yazmaz", () => {
+  const veri = { kayitlar: [{ tarih: "2026-09-08", rb: 9.99, kaynak: "elle" }] };
+  const degisen = kayitlariIsle(veri, [
+    ["rb", { deger: 3.18, tarih: "2026-09-08", ad: "Yahoo RB=F", url: "https://y/rb" }],
+    ["rb", { deger: 3.10, tarih: "2026-09-04", ad: "Yahoo RB=F", url: "https://y/rb" }],
+  ]);
+  assert.equal(degisen, 1);
+  assert.equal(veri.kayitlar.find((k) => k.tarih === "2026-09-08").rb, 9.99);
+  assert.equal(veri.kayitlar.find((k) => k.tarih === "2026-09-04").rb, 3.10);
 });

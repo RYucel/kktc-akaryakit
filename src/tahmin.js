@@ -6,12 +6,15 @@ const KALIBRASYON_GUN = 5;
 // 15 günlük ortalamadan söz eder. Aynı uzunluk burada kalibrasyon penceresi olarak kullanılır.
 const PENCERE_GUN = 15;
 
-export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "ho", "brent", "kur"];
+export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "ho", "rb", "brent", "kur"];
 
-// NY Heating Oil (ULSD) $/galon olarak kote edilir; Akdeniz CIF ise $/metrik ton.
-// Kalibrasyon toplamsal olduğu için iki seri aynı birimde olmalı. Euro Diesel yoğunluğu
-// (Tüzük md. 8: 0,845) ve 1 US galon = 3,785411784 L ile: 1 ton = 312,66 galon.
-export const GALON_TON = 1000 / 0.845 / 3.785411784;
+// NY Heating Oil (ULSD) ve RBOB $/galon olarak kote edilir; Akdeniz CIF ise $/metrik ton.
+// Kalibrasyon toplamsal olduğu için iki seri aynı birimde olmalı. Çevrim ürünün yoğunluğuna
+// bağlıdır (Tüzük md. 8: dizel 0,845, benzin 0,775) ve 1 US galon = 3,785411784 L:
+// dizelde 1 ton = 312,66 galon, benzinde 340,63 galon. Tek bir katsayı ikisine birden uymaz.
+const LITRE_GALON = 3.785411784;
+export const GALON_TON_DIZEL = 1000 / 0.845 / LITRE_GALON;
+export const GALON_TON_BENZIN = 1000 / 0.775 / LITRE_GALON;
 
 // Kalibrasyon yalnız GÖZLENMİŞ CIF ile yapılır. Resmî fiyattan geriye hesaplanan değer
 // (tahminiAlanlar'da işaretli) o günün kotasyonu değil, fiyatlama penceresinin ortalamasıdır;
@@ -65,36 +68,50 @@ export function pencereFarki(sirali, hedef, vekil, pencere, gun = PENCERE_GUN) {
   return { fark: h.deger - v.deger, hedefGun: h.gun, vekilGun: v.gun, bas: basIso, son: sonIso };
 }
 
+// Vekilleri sırayla dener: önce günlük eşleşmeden kalibre edilmiş fark, o yoksa resmî
+// pencere farkı. İlk tutan vekil kazanır; hiçbiri tutmazsa false döner ve çağıran Brent'e düşer.
+function vekilUygula(r, hedef, vekiller, sirali, pencere) {
+  for (const [alan, deger, etiketGun, etiketPencere] of vekiller) {
+    if (deger == null) continue;
+    const f = farkHesapla(sirali, hedef, alan, r.tarih);
+    if (f) { r[hedef] = deger + f.fark; r.tahmini.push(hedef); r.yontem[hedef] = etiketGun; return true; }
+    const p = pencereFarki(sirali, hedef, alan, pencere);
+    if (p) { r[hedef] = deger + p.fark; r.tahmini.push(hedef); r.yontem[hedef] = etiketPencere; return true; }
+  }
+  return false;
+}
+
 // pencere: resmî fiyatın yürürlük tarihi (string). Verilmezse pencere kalibrasyonu atlanır.
 export function turet(kayitlar, pencere = null) {
-  const sirali = [...kayitlar]
-    .sort((a, b) => a.tarih.localeCompare(b.tarih))
-    // hoTon: NY ULSD'nin $/ton karşılığı. Kalibrasyon bu türetilmiş sütun üzerinden yapılır.
-    .map((k) => (typeof k.ho === "number" && Number.isFinite(k.ho) ? { ...k, hoTon: k.ho * GALON_TON } : k));
+  // hoTon / rbTon: galon kotasyonlarının $/ton karşılığı. Kalibrasyon bu türetilmiş
+  // sütunlar üzerinden yapılır, çünkü hedef seri (CIF Med) $/ton.
+  const tonaCevir = (k) => {
+    const ek = {};
+    if (typeof k.ho === "number" && Number.isFinite(k.ho)) ek.hoTon = k.ho * GALON_TON_DIZEL;
+    if (typeof k.rb === "number" && Number.isFinite(k.rb)) ek.rbTon = k.rb * GALON_TON_BENZIN;
+    return Object.keys(ek).length ? { ...k, ...ek } : k;
+  };
+  const sirali = [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih)).map(tonaCevir);
   let capaB = null, capaDB = null;
   return sirali.map((k) => {
     const r = { ...k, tahmini: [...(k.tahminiAlanlar || [])], yontem: Object.fromEntries((k.tahminiAlanlar || []).map((a) => [a, "model"])) };
     if (k.b95 == null) {
-      const f = k.eurobob != null ? farkHesapla(sirali, "b95", "eurobob", k.tarih) : null;
-      const p = !f && k.eurobob != null ? pencereFarki(sirali, "b95", "eurobob", pencere) : null;
-      if (f) { r.b95 = k.eurobob + f.fark; r.tahmini.push("b95"); r.yontem.b95 = "eurobob"; }
-      else if (p) { r.b95 = k.eurobob + p.fark; r.tahmini.push("b95"); r.yontem.b95 = "eurobobPencere"; }
-      else if (k.brent != null && capaB) { r.b95 = capaB.b95 + (k.brent - capaB.brent) * VARIL_TON.benzin; r.tahmini.push("b95"); r.yontem.b95 = "brent"; }
+      // Vekil sırası: Eurobob (Akdeniz benzinine en yakın, ama ücretsiz günlük kaynağı yok),
+      // sonra RBOB (aynı ürün ailesi, ABD pazarı, ücretsiz), en son Brent.
+      const rbTon = typeof k.rb === "number" && Number.isFinite(k.rb) ? k.rb * GALON_TON_BENZIN : null;
+      const vekiller = [["eurobob", k.eurobob, "eurobob", "eurobobPencere"], ["rbTon", rbTon, "rb", "rbPencere"]];
+      if (!vekilUygula(r, "b95", vekiller, sirali, pencere) && k.brent != null && capaB) {
+        r.b95 = capaB.b95 + (k.brent - capaB.brent) * VARIL_TON.benzin; r.tahmini.push("b95"); r.yontem.b95 = "brent";
+      }
     }
     if (k.dz == null) {
       // Vekil sırası: ICE gasoil (Akdeniz dizeline en yakın), sonra NY ULSD (aynı ürün ailesi,
       // farklı pazar), en son Brent. Brent son çaredir: distilat ham petrolden koptuğunda yanıltır.
-      const hoTon = typeof k.ho === "number" && Number.isFinite(k.ho) ? k.ho * GALON_TON : null;
+      const hoTon = typeof k.ho === "number" && Number.isFinite(k.ho) ? k.ho * GALON_TON_DIZEL : null;
       const vekiller = [["gasoil", k.gasoil, "gasoil", "gasoilPencere"], ["hoTon", hoTon, "ho", "hoPencere"]];
-      let kondu = false;
-      for (const [alan, deger, etiketGun, etiketPencere] of vekiller) {
-        if (deger == null) continue;
-        const f = farkHesapla(sirali, "dz", alan, k.tarih);
-        if (f) { r.dz = deger + f.fark; r.tahmini.push("dz"); r.yontem.dz = etiketGun; kondu = true; break; }
-        const p = pencereFarki(sirali, "dz", alan, pencere);
-        if (p) { r.dz = deger + p.fark; r.tahmini.push("dz"); r.yontem.dz = etiketPencere; kondu = true; break; }
+      if (!vekilUygula(r, "dz", vekiller, sirali, pencere) && k.brent != null && capaDB) {
+        r.dz = capaDB.dz + (k.brent - capaDB.brent) * VARIL_TON.dizel; r.tahmini.push("dz"); r.yontem.dz = "brent";
       }
-      if (!kondu && k.brent != null && capaDB) { r.dz = capaDB.dz + (k.brent - capaDB.brent) * VARIL_TON.dizel; r.tahmini.push("dz"); r.yontem.dz = "brent"; }
     }
     if (k.b95 != null && k.brent != null) capaB = { b95: k.b95, brent: k.brent };
     if (k.dz != null && k.brent != null) capaDB = { dz: k.dz, brent: k.brent };
