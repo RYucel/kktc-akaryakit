@@ -15,7 +15,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "../src/piyasa.js";
 
-export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], brent: [20, 300], kur: [10, 200] };
+export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], brent: [20, 300], kur: [10, 200] };
 export const MAKS_YAS_GUN = 5;
 const ZAMAN_ASIMI_MS = 15000;
 const UA = "kktc-akaryakit/1.0 (+https://github.com/RYucel/kktc-akaryakit)";
@@ -76,7 +76,7 @@ export function yahooChart(metin) {
 
 // Borsa serilerinde bugünün barı henüz kapanmamıştır; kapanış diye kaydedilirse
 // gün içi bir değer uzlaşma yerine geçer. Bu yüzden kapanmamış gün elenir.
-export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo"]);
+export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo", "ho"]);
 
 export function sec(sonuc, alan, bugun) {
   if (sonuc.hata) return sonuc;
@@ -132,13 +132,14 @@ export const KAYNAKLAR = {
   brent: [
     { ad: "Yahoo BZ=F", url: yahoo("BZ=F"), ayristir: yahooChart },
   ],
-  gasoil: [
-    { ad: "Yahoo 7F=F", url: yahoo("7F=F", "3mo"), ayristir: yahooChart },
-    ...vadeSembolleri(kktcBugun(), "7F").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
-  ],
-  hsfo: [
-    { ad: "Yahoo UV=F", url: yahoo("UV=F", "3mo"), ayristir: yahooChart },
-    ...vadeSembolleri(kktcBugun(), "UV").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
+  // ICE gasoil'in ücretsiz günlük kaynağı bulunamadı. Yahoo'da yalnız S&P GSCI gasoil
+  // ENDEKSLERİ var (^SPGPRGOP vb.); bunlar $/ton fiyat değil seviye, toplamsal kalibrasyonla
+  // kullanılamaz. Gasoil elle giriliyor; otomatik vekil olarak ho (NY ULSD) kullanılıyor.
+  gasoil: [],
+  hsfo: [],
+  ho: [
+    { ad: "Yahoo HO=F", url: yahoo("HO=F", "1mo"), ayristir: yahooChart },
+    ...vadeSembolleri(kktcBugun(), "HO").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
   ],
 };
 

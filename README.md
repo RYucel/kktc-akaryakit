@@ -46,8 +46,20 @@ değerin üzerine yazılmaz, yalnız boş alanlar doldurulur; yazım öncesi ve 
 çalışır. Kaynak biçim değiştirmişse ayrıştırıcı hata döndürür, dosyaya dokunulmaz.
 
 Kaynaklar `KAYNAKLAR` sabitinde sırayla denenir; yenisini eklemek bir satır ve bir ayrıştırıcıdır.
-Gasoil ve HSFO, CME'nin nakit uzlaşan Avrupa sözleşmeleri üzerinden alınır (`7F` ve `UV`); vade
-sembolü aya göre değiştiği için önümüzdeki üç vade denenir, roll döneminde biri yanıt verir.
+Doğru sembolü tahmin etmek yerine sordurmak için `--ara <terim>` kipi vardır.
+
+| Alan | Otomatik kaynak |
+| --- | --- |
+| `kur` | KKTC Merkez Bankası, USD Döviz Satış |
+| `brent` | Yahoo `BZ=F` |
+| `ho` | Yahoo `HO=F` (NY Harbor ULSD), vade sembolleriyle birlikte |
+| `gasoil`, `hsfo`, `eurobob` | **yok — elle girilir** |
+
+ICE gasoil ve Avrupa HSFO'nun ücretsiz günlük kaynağı bulunamadı. Yahoo'da yalnız S&P GSCI
+gasoil *endeksleri* var (`^SPGPRGOP` gibi); bunlar $/ton fiyat değil seviye, toplamsal
+kalibrasyonla kullanılamaz. Gasoil'in tarihsel tablosu
+[Investing.com'da açık](https://www.investing.com/commodities/london-gas-oil-historical-data)
+ama otomatik çekilemiyor.
 
 **Borsa serilerinde bugünün barı elenir.** Gün içi bir değer uzlaşma yerine kaydedilirse koridor
 ortalaması sahte olur. `kur` bu kuralın dışındadır: Merkez Bankası kuru o gün için resmî olarak

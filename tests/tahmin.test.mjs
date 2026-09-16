@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { farkHesapla, pencereFarki, turet, gunlukBirlestir } from "../src/tahmin.js";
+import { farkHesapla, pencereFarki, turet, gunlukBirlestir, GALON_TON } from "../src/tahmin.js";
 
 test("future calibration pairs cannot affect older estimates", () => {
   const rows = [{ tarih: "2026-09-10", eurobob: 1400 }, { tarih: "2026-09-11", eurobob: 1410, b95: 1500 }];
@@ -144,4 +144,38 @@ test("türetilmiş çapa varken turet pencere yolunu kullanır, günlük yolu de
   const son = turet(rows, { gunler }).at(-1);
   assert.equal(son.yontem.dz, "gasoilPencere");
   assert.ok(Math.abs(son.dz - (1549 + (1351.3 - 1359.0625))) < 1e-9);
+});
+
+test("NY ULSD galon fiyatı tona çevrilerek vekil olarak kullanılır", () => {
+  assert.ok(Math.abs(GALON_TON - 1000 / 0.845 / 3.785411784) < 1e-9);
+  const rows = [
+    { tarih: "2026-09-04", ho: 4.20 },
+    { tarih: "2026-09-07", ho: 4.38 },
+    { tarih: "2026-09-08", ho: 4.31 },
+    { tarih: "2026-09-09", ho: 4.44, dz: 1351.3, tahminiAlanlar: ["dz"] },
+    { tarih: "2026-09-16", ho: 4.95 },
+  ];
+  const gunler = ["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"];
+  const son = turet(rows, { gunler }).at(-1);
+  assert.equal(son.yontem.dz, "hoPencere");
+  const pencereOrt = ((4.20 + 4.38 + 4.31 + 4.44) / 4) * GALON_TON;
+  assert.ok(Math.abs(son.dz - (4.95 * GALON_TON + (1351.3 - pencereOrt))) < 1e-9);
+});
+
+test("gasoil varsa NY ULSD'ye düşülmez", () => {
+  const rows = [
+    { tarih: "2026-09-04", gasoil: 1321.5, ho: 4.20 },
+    { tarih: "2026-09-09", gasoil: 1388.25, ho: 4.44, dz: 1351.3, tahminiAlanlar: ["dz"] },
+    { tarih: "2026-09-16", gasoil: 1549, ho: 4.95 },
+  ];
+  const son = turet(rows, { gunler: ["2026-09-04", "2026-09-09"] }).at(-1);
+  assert.equal(son.yontem.dz, "gasoilPencere");
+});
+
+test("hiç vekil yoksa Brent'e düşülür", () => {
+  const rows = [
+    { tarih: "2026-09-09", dz: 1351.3, brent: 101.21, tahminiAlanlar: ["dz"] },
+    { tarih: "2026-09-16", brent: 108.09 },
+  ];
+  assert.equal(turet(rows, { gunler: ["2026-09-09"] }).at(-1).yontem.dz, "brent");
 });

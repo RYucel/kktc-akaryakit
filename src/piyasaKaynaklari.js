@@ -34,6 +34,11 @@ export const PIYASA_KAYNAKLARI = {
       { ad: "ICE gün sonu raporu", url: "https://www.ice.com/report/10" },
     ],
   },
+  ho: {
+    aciklama: "NYMEX Heating Oil (NY Harbor ULSD) en yakın vade kapanışı, Yahoo sembolü HO=F; USD/GALON. Ton değil galon girilir, çevrimi uygulama yapar (1 ton = 312,66 galon).",
+    erisim: "Ücretsiz ve günlük. Amerikan pazarıdır; Akdeniz dizeline gasoil kadar yakın değildir ama aynı ürün ailesidir (orta distilat) ve Brent'ten çok daha iyi bir vekildir. Gasoil elde varsa o tercih edilir.",
+    linkler: [{ ad: "Heating Oil vadeli fiyatları", url: "https://finance.yahoo.com/quote/HO%3DF/" }],
+  },
   brent: {
     aciklama: "Brent Oil vadeli fiyatı; USD/varil. Daily (günlük) tabloda ilgili günün Price (kapanış) değerini al. WTI veya benzin fiyatını seçme.",
     erisim: "Investing.com gösterge verisidir; borsanın resmî uzlaşması için ICE raporunu kullan. Aynı vade serisini izle; Brent yalnız yaklaşık tahminde kullanılır.",

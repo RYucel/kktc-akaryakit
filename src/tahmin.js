@@ -6,7 +6,12 @@ const KALIBRASYON_GUN = 5;
 // 15 günlük ortalamadan söz eder. Aynı uzunluk burada kalibrasyon penceresi olarak kullanılır.
 const PENCERE_GUN = 15;
 
-export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "brent", "kur"];
+export const ALANLAR = ["b95", "dz", "eurobob", "gasoil", "hsfo", "ho", "brent", "kur"];
+
+// NY Heating Oil (ULSD) $/galon olarak kote edilir; Akdeniz CIF ise $/metrik ton.
+// Kalibrasyon toplamsal olduğu için iki seri aynı birimde olmalı. Euro Diesel yoğunluğu
+// (Tüzük md. 8: 0,845) ve 1 US galon = 3,785411784 L ile: 1 ton = 312,66 galon.
+export const GALON_TON = 1000 / 0.845 / 3.785411784;
 
 // Kalibrasyon yalnız GÖZLENMİŞ CIF ile yapılır. Resmî fiyattan geriye hesaplanan değer
 // (tahminiAlanlar'da işaretli) o günün kotasyonu değil, fiyatlama penceresinin ortalamasıdır;
@@ -62,7 +67,10 @@ export function pencereFarki(sirali, hedef, vekil, pencere, gun = PENCERE_GUN) {
 
 // pencere: resmî fiyatın yürürlük tarihi (string). Verilmezse pencere kalibrasyonu atlanır.
 export function turet(kayitlar, pencere = null) {
-  const sirali = [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih));
+  const sirali = [...kayitlar]
+    .sort((a, b) => a.tarih.localeCompare(b.tarih))
+    // hoTon: NY ULSD'nin $/ton karşılığı. Kalibrasyon bu türetilmiş sütun üzerinden yapılır.
+    .map((k) => (typeof k.ho === "number" && Number.isFinite(k.ho) ? { ...k, hoTon: k.ho * GALON_TON } : k));
   let capaB = null, capaDB = null;
   return sirali.map((k) => {
     const r = { ...k, tahmini: [...(k.tahminiAlanlar || [])], yontem: Object.fromEntries((k.tahminiAlanlar || []).map((a) => [a, "model"])) };
@@ -74,11 +82,19 @@ export function turet(kayitlar, pencere = null) {
       else if (k.brent != null && capaB) { r.b95 = capaB.b95 + (k.brent - capaB.brent) * VARIL_TON.benzin; r.tahmini.push("b95"); r.yontem.b95 = "brent"; }
     }
     if (k.dz == null) {
-      const f = k.gasoil != null ? farkHesapla(sirali, "dz", "gasoil", k.tarih) : null;
-      const p = !f && k.gasoil != null ? pencereFarki(sirali, "dz", "gasoil", pencere) : null;
-      if (f) { r.dz = k.gasoil + f.fark; r.tahmini.push("dz"); r.yontem.dz = "gasoil"; }
-      else if (p) { r.dz = k.gasoil + p.fark; r.tahmini.push("dz"); r.yontem.dz = "gasoilPencere"; }
-      else if (k.brent != null && capaDB) { r.dz = capaDB.dz + (k.brent - capaDB.brent) * VARIL_TON.dizel; r.tahmini.push("dz"); r.yontem.dz = "brent"; }
+      // Vekil sırası: ICE gasoil (Akdeniz dizeline en yakın), sonra NY ULSD (aynı ürün ailesi,
+      // farklı pazar), en son Brent. Brent son çaredir: distilat ham petrolden koptuğunda yanıltır.
+      const hoTon = typeof k.ho === "number" && Number.isFinite(k.ho) ? k.ho * GALON_TON : null;
+      const vekiller = [["gasoil", k.gasoil, "gasoil", "gasoilPencere"], ["hoTon", hoTon, "ho", "hoPencere"]];
+      let kondu = false;
+      for (const [alan, deger, etiketGun, etiketPencere] of vekiller) {
+        if (deger == null) continue;
+        const f = farkHesapla(sirali, "dz", alan, k.tarih);
+        if (f) { r.dz = deger + f.fark; r.tahmini.push("dz"); r.yontem.dz = etiketGun; kondu = true; break; }
+        const p = pencereFarki(sirali, "dz", alan, pencere);
+        if (p) { r.dz = deger + p.fark; r.tahmini.push("dz"); r.yontem.dz = etiketPencere; kondu = true; break; }
+      }
+      if (!kondu && k.brent != null && capaDB) { r.dz = capaDB.dz + (k.brent - capaDB.brent) * VARIL_TON.dizel; r.tahmini.push("dz"); r.yontem.dz = "brent"; }
     }
     if (k.b95 != null && k.brent != null) capaB = { b95: k.b95, brent: k.brent };
     if (k.dz != null && k.brent != null) capaDB = { dz: k.dz, brent: k.brent };
