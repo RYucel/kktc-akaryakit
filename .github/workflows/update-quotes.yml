@@ -1,6 +1,6 @@
 name: Kotasyonları güncelle
 
-# Ücretsiz kaynaklardan kur, Brent, NY ULSD ve RBOB toplar. Gasoil, HSFO ve Eurobob'un
+# Ücretsiz kaynaklardan kur, Brent, Eurobob, NY ULSD ve RBOB toplar. Gasoil ve HSFO'nun
 # ücretsiz otomatik kaynağı yok; onlar radar formundan elle giriliyor.
 #
 # Fiyat emirnamesini bu iş DEĞİL, update-prices.yml yakalar. Buradaki veri yalnız

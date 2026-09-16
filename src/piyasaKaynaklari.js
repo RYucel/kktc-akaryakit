@@ -11,11 +11,11 @@ export const PIYASA_KAYNAKLARI = {
     linkler: [{ ad: "Platts veri erişimi", url: "https://www.spglobal.com/energy/en/products-solutions/upstream-midstream-oil-gas/platts-european-marketscan" }],
   },
   eurobob: {
-    aciklama: "ICE: Eurobob Oxy Gasoline NWE FOB Barges (GX), MHN; USD/metrik ton. Gün sonu raporunda tarih, ürün ve en yakın vade için Settlement (uzlaşma) değerini seç.",
-    erisim: "Rapor erişimi üyelik gerektirebilir. Oxy/Non-Oxy, GX/Argus ve vade serilerini karıştırma; bulunamayan değeri boş bırak.",
+    aciklama: "Gasoline Euro-bob Oxy NWE Barges (Argus) en yakın vade kapanışı, CME kodu B7H, Yahoo sembolü B7H=F; USD/metrik ton. Benzinin birinci vekilidir: Akdeniz benzinine RBOB'dan çok daha yakındır.",
+    erisim: "Ücretsiz ve günlük; toplayıcı bu alanı kendiliğinden doldurur. Oxy/Non-Oxy ve vade serilerini karıştırma — Non-Oxy (GNO) ayrı bir seridir. Borsanın resmî uzlaşması için ICE raporuna bakabilirsin.",
     linkler: [
+      { ad: "Eurobob Oxy vadeli fiyatları", url: "https://finance.yahoo.com/quote/B7H%3DF/" },
       { ad: "ICE gün sonu raporu", url: "https://www.ice.com/report/10" },
-      { ad: "MHN ürün tanımı", url: "https://www.ice.com/products/83047818" },
     ],
   },
   gasoil: {
@@ -41,7 +41,7 @@ export const PIYASA_KAYNAKLARI = {
   },
   rb: {
     aciklama: "NYMEX RBOB Gasoline en yakın vade kapanışı, Yahoo sembolü RB=F; USD/GALON. Ton değil galon girilir, çevrimi uygulama yapar (benzinde 1 ton = 340,63 galon).",
-    erisim: "Ücretsiz ve günlük. Eurobob'un ücretsiz günlük kaynağı bulunamadığı için benzinin otomatik vekili budur; ho'nun dizel için yaptığı işi benzin için yapar. Amerikan pazarıdır, Akdeniz benzinine Eurobob kadar yakın değildir ama aynı ürün ailesidir ve Brent'ten çok daha iyi bir vekildir. Eurobob elde varsa o tercih edilir.",
+    erisim: "Ücretsiz ve günlük. Benzinin yedek vekilidir: Eurobob'un bulunamadığı günlerde devreye girer ve ho'nun dizel için yaptığı işi benzin için yapar. Amerikan pazarıdır, Akdeniz benzinine Eurobob kadar yakın değildir ama aynı ürün ailesidir ve Brent'ten çok daha iyi bir vekildir. Eurobob elde varsa o tercih edilir.",
     linkler: [{ ad: "RBOB vadeli fiyatları", url: "https://finance.yahoo.com/quote/RB%3DF/" }],
   },
   brent: {

@@ -74,7 +74,7 @@
       "brent": 90.87,
       "ho": 4.4371,
       "rb": 3.2701,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -87,16 +87,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1051.42
     },
     {
       "tarih": "2026-08-18",
       "brent": 91.02,
       "ho": 4.4501,
       "rb": 3.3017,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -109,16 +114,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1055.64
     },
     {
       "tarih": "2026-08-19",
       "brent": 91.62,
       "ho": 4.4523,
       "rb": 3.2551,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -131,16 +141,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1053.77
     },
     {
       "tarih": "2026-08-20",
       "brent": 93.78,
       "ho": 4.4803,
       "rb": 3.2629,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -153,16 +168,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1060.05
     },
     {
       "tarih": "2026-08-21",
       "brent": 94.39,
       "ho": 4.4948,
       "rb": 3.3479,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -175,16 +195,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1067.85
     },
     {
       "tarih": "2026-08-24",
       "brent": 92.17,
       "ho": 4.2677,
       "rb": 3.2708,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -197,16 +222,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1064.54
     },
     {
       "tarih": "2026-08-25",
       "brent": 88.58,
       "ho": 4.2438,
       "rb": 3.2529,
-      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "Yahoo BZ=F",
@@ -219,15 +249,20 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış."
+      "not": "Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
+      "eurobob": 1060.43
     },
     {
       "tarih": "2026-08-26",
       "gasoil": 1239.5,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -244,17 +279,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 87.84,
       "ho": 4.26,
-      "rb": 3.3201
+      "rb": 3.3201,
+      "eurobob": 1060.36
     },
     {
       "tarih": "2026-08-27",
       "gasoil": 1221.75,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -271,17 +311,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 89.7,
       "ho": 4.2787,
-      "rb": 3.3842
+      "rb": 3.3842,
+      "eurobob": 1062.75
     },
     {
       "tarih": "2026-08-28",
       "gasoil": 1280,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -298,17 +343,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 89.31,
       "ho": 4.3567,
-      "rb": 3.4899
+      "rb": 3.4899,
+      "eurobob": 1064.32
     },
     {
       "tarih": "2026-08-31",
       "gasoil": 1347.75,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -325,17 +375,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 90.49,
       "ho": 4.4953,
-      "rb": 3.437
+      "rb": 3.437,
+      "eurobob": 1140.05
     },
     {
       "tarih": "2026-09-01",
       "gasoil": 1345.25,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -352,17 +407,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 94.65,
       "ho": 4.6773,
-      "rb": 3.1351
+      "rb": 3.1351,
+      "eurobob": 1161.26
     },
     {
       "tarih": "2026-09-02",
       "gasoil": 1357.25,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -379,17 +439,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 95.63,
       "ho": 4.6822,
-      "rb": 3.1038
+      "rb": 3.1038,
+      "eurobob": 1189.92
     },
     {
       "tarih": "2026-09-03",
       "gasoil": 1349,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -406,17 +471,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 95.52,
       "ho": 4.5936,
-      "rb": 3.1349
+      "rb": 3.1349,
+      "eurobob": 1212.49
     },
     {
       "tarih": "2026-09-04",
       "gasoil": 1321.5,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -433,11 +503,16 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 96.28,
       "ho": 4.5402,
-      "rb": 3.2146
+      "rb": 3.2146,
+      "eurobob": 1213.24
     },
     {
       "tarih": "2026-09-07",
@@ -454,8 +529,8 @@
     {
       "tarih": "2026-09-08",
       "gasoil": 1351.75,
-      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "London Gas Oil tarihli fiyatlar",
@@ -472,22 +547,27 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "brent": 97.92,
       "ho": 4.5678,
-      "rb": 3.2525
+      "rb": 3.2525,
+      "eurobob": 1212.37
     },
     {
       "tarih": "2026-09-09",
       "b95": 1492.6,
       "brent": 101.21,
-      "kaynak": "başlangıç + Investing.com + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "başlangıç + Investing.com + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "tahminiAlanlar": [
         "b95",
         "dz"
       ],
-      "not": "Benzin ve dizel: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "not": "Benzin ve dizel: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "dz": 1351.3,
       "gasoil": 1388.25,
       "kaynaklar": [
@@ -502,17 +582,22 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "ho": 4.801,
-      "rb": 3.2106
+      "rb": 3.2106,
+      "eurobob": 1184.67
     },
     {
       "tarih": "2026-09-10",
       "brent": 108.97,
       "kur": 48.5,
-      "kaynak": "başlangıç + Investing.com + Yahoo HO=F + Yahoo RB=F",
-      "not": "Brent: 10 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "başlangıç + Investing.com + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Brent: 10 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "gasoil": 1474.5,
       "kaynaklar": [
         {
@@ -526,18 +611,23 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "ho": 5.0575,
-      "rb": 3.3932
+      "rb": 3.3932,
+      "eurobob": 1255.24
     },
     {
       "tarih": "2026-09-11",
       "gasoil": 1479.25,
       "hsfo": 551.085,
       "brent": 104.61,
-      "kaynak": "TradingView (gecikmeli) + Yahoo HO=F + Yahoo RB=F",
-      "not": "Cuma uzlaşmaları: gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 14 Eylül seans içi değerinden günlük değişim düşülerek; HSFO NYMEX:UV1! son yayımlanan uzlaşma. ICE/Platts resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "TradingView (gecikmeli) + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Cuma uzlaşmaları: gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 14 Eylül seans içi değerinden günlük değişim düşülerek; HSFO NYMEX:UV1! son yayımlanan uzlaşma. ICE/Platts resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
@@ -550,16 +640,21 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "ho": 4.9593,
-      "rb": 3.3072
+      "rb": 3.3072,
+      "eurobob": 1255.26
     },
     {
       "tarih": "2026-09-14",
       "kur": 48.5178,
-      "kaynak": "KKTC Merkez Bankası + Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "14 Eylül 2026 tarihinde geçerli resmî kur, USD Döviz Satış. Aynı güne ait gasoil/Brent seans içi değerleri (1497,25 ve 107,67) gün kapanmadığı için girilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "KKTC Merkez Bankası + Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "14 Eylül 2026 tarihinde geçerli resmî kur, USD Döviz Satış. Aynı güne ait gasoil/Brent seans içi değerleri (1497,25 ve 107,67) gün kapanmadığı için girilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "Merkez Bankası tarihli kurlar",
@@ -580,18 +675,23 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "gasoil": 1476.5,
       "brent": 105.68,
       "ho": 4.9615,
-      "rb": 3.3171
+      "rb": 3.3171,
+      "eurobob": 1272.07
     },
     {
       "tarih": "2026-09-15",
       "hsfo": 558.236,
-      "kaynak": "TradingView (gecikmeli) + Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
-      "not": "HSFO NYMEX:UV1! son yayımlanan uzlaşma; bu sözleşme yalnız gün sonu uzlaşması yayımlar, 16 Eylül sabahı itibarıyla en güncel değer 15 Eylül'e ait. Platts resmî değerlendirmesiyle teyit edilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "kaynak": "TradingView (gecikmeli) + Investing.com + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "HSFO NYMEX:UV1! son yayımlanan uzlaşma; bu sözleşme yalnız gün sonu uzlaşması yayımlar, 16 Eylül sabahı itibarıyla en güncel değer 15 Eylül'e ait. Platts resmî değerlendirmesiyle teyit edilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
@@ -612,12 +712,17 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "gasoil": 1568.25,
       "brent": 108.75,
       "ho": 5.262,
-      "rb": 3.4652
+      "rb": 3.4652,
+      "eurobob": 1284.74
     },
     {
       "tarih": "2026-09-16",

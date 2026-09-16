@@ -16,11 +16,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "../src/piyasa.js";
 
-export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], rb: [0.5, 20], brent: [20, 300], kur: [10, 200] };
+export const ARALIK = { eurobob: [300, 3000], gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], rb: [0.5, 20], brent: [20, 300], kur: [10, 200] };
 
 // Kaynaklar kayan nokta artığı döndürebiliyor (Yahoo float32: 5.26200008392334). Bu dosya
 // elle de düzenleniyor; değerler alanın gerçek hassasiyetine yuvarlanarak yazılır.
-export const BASAMAK = { gasoil: 2, hsfo: 3, ho: 4, rb: 4, brent: 2, kur: 4 };
+export const BASAMAK = { eurobob: 2, gasoil: 2, hsfo: 3, ho: 4, rb: 4, brent: 2, kur: 4 };
 export const yuvarla = (alan, deger) => Number(deger.toFixed(BASAMAK[alan] ?? 4));
 
 export const MAKS_YAS_GUN = 5;
@@ -51,21 +51,6 @@ export function mbKur(metin) {
   return { deger, tarih: tarih ? `${tarih[3]}-${tarih[2]}-${tarih[1]}` : null };
 }
 
-// Stooq tek satır CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
-export function stooqCsv(metin) {
-  const satirlar = metin.trim().split(/\r?\n/);
-  if (satirlar.length < 2) return { hata: "CSV boş" };
-  const baslik = satirlar[0].toLowerCase().split(",");
-  const veri = satirlar[1].split(",");
-  const al = (ad) => { const i = baslik.indexOf(ad); return i < 0 ? null : veri[i]; };
-  const ham = al("close");
-  if (ham == null) return { hata: "Close sütunu yok" };
-  if (/^n\/?d$/i.test(ham.trim())) return { hata: "Stooq bu sembol için veri döndürmedi (N/D)" };
-  const deger = sayi(ham);
-  if (deger == null) return { hata: `Close sayıya çevrilemedi: ${ham}` };
-  const t = al("date");
-  return { deger, tarih: t && tarihGecerli(t) ? t : null };
-}
 
 // Yahoo Finance chart API: günlük kapanış serisi.
 export function yahooChart(metin) {
@@ -86,7 +71,7 @@ export function yahooChart(metin) {
 
 // Borsa serilerinde bugünün barı henüz kapanmamıştır; kapanış diye kaydedilirse
 // gün içi bir değer uzlaşma yerine geçer. Bu yüzden kapanmamış gün elenir.
-export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "gasoil", "hsfo", "ho", "rb"]);
+export const KAPANMIS_GUN_GEREKIR = new Set(["brent", "eurobob", "gasoil", "hsfo", "ho", "rb"]);
 
 // Yahoo tek istekte bir aylık seri döndürüyor; geçmiş doldurma kipi bunun tamamını kullanır.
 // Kalibrasyon penceresi ancak böyle dolar: canlı koşu yalnız son kapanmış günü yazabilir.
@@ -153,9 +138,15 @@ export const KAYNAKLAR = {
   brent: [
     { ad: "Yahoo BZ=F", url: yahoo("BZ=F"), ayristir: yahooChart },
   ],
+  // Eurobob: CME'nin "Gasoline Euro-bob Oxy NWE Barges (Argus)" sözleşmesi, kod B7H, USD/ton.
+  // Sürekli sembol (B7H=F) veri döndürür; vade sembolleri (B7HV26.NYM) 404 verir, o yüzden yok.
+  eurobob: [
+    { ad: "Yahoo B7H=F", url: yahoo("B7H=F"), ayristir: yahooChart },
+  ],
   // ICE gasoil'in ücretsiz günlük kaynağı bulunamadı. Yahoo'da yalnız S&P GSCI gasoil
   // ENDEKSLERİ var (^SPGPRGOP vb.); bunlar $/ton fiyat değil seviye, toplamsal kalibrasyonla
-  // kullanılamaz. Gasoil elle giriliyor; otomatik vekil olarak ho (NY ULSD) kullanılıyor.
+  // kullanılamaz. Avrupa HSFO'da da UV=F sembolü boş seri döndürüyor. İkisi de elle giriliyor;
+  // gasoil'in otomatik vekili ho (NY ULSD).
   gasoil: [],
   hsfo: [],
   ho: [
@@ -211,7 +202,9 @@ export function kayitlariIsle(veri, kabul) {
 
 export function denetle(alan, sonuc, bugun, maksYas = MAKS_YAS_GUN) {
   if (sonuc.hata) return { durum: "hata", neden: sonuc.hata };
-  const [min, max] = ARALIK[alan];
+  const aralik = ARALIK[alan];
+  if (!aralik) return { durum: "red", neden: `${alan} için aralık tanımlı değil` };
+  const [min, max] = aralik;
   if (!(typeof sonuc.deger === "number" && Number.isFinite(sonuc.deger))) return { durum: "red", neden: "sayı değil" };
   if (sonuc.deger < min || sonuc.deger > max) return { durum: "red", neden: `${min}–${max} aralığı dışında, birim hatası olabilir` };
   if (!sonuc.tarih) return { durum: "red", neden: "kaynakta tarih yok" };

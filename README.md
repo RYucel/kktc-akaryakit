@@ -59,7 +59,8 @@ Doğru sembolü tahmin etmek yerine sordurmak için `--ara <terim>` kipi vardır
 | `brent` | Yahoo `BZ=F` |
 | `ho` | Yahoo `HO=F` (NY Harbor ULSD), vade sembolleriyle birlikte |
 | `rb` | Yahoo `RB=F` (RBOB benzin), vade sembolleriyle birlikte |
-| `gasoil`, `hsfo`, `eurobob` | **yok — elle girilir** |
+| `eurobob` | Yahoo `B7H=F` (Euro-bob Oxy NWE Barges, Argus; CME kodu B7H) |
+| `gasoil`, `hsfo` | **yok — elle girilir** |
 
 ICE gasoil ve Avrupa HSFO'nun ücretsiz günlük kaynağı bulunamadı. Yahoo'da yalnız S&P GSCI
 gasoil *endeksleri* var (`^SPGPRGOP` gibi); bunlar $/ton fiyat değil seviye, toplamsal
@@ -163,7 +164,7 @@ ve aradaki **Akdeniz farkı**nı kalibre etmeye çalışır. Vekil sırası ür�
 
 | Ürün | 1. vekil | 2. vekil | son çare |
 | --- | --- | --- | --- |
-| Benzin | Eurobob (elle) | **RBOB `rb`** (ücretsiz, otomatik) | Brent |
+| Benzin | Eurobob `B7H=F` (ücretsiz, otomatik) | RBOB `rb` (ücretsiz, otomatik) | Brent |
 | Dizel | gasoil (elle) | NY ULSD `ho` (ücretsiz, otomatik) | Brent |
 
 İkinci vekiller galon cinsinden kote edilir ve kalibrasyon öncesi tona çevrilir; katsayı ürünün
@@ -198,9 +199,14 @@ günlere toplayıcı tarafından kendiliğinden yazılır; elle girmek istersen 
 [herkese açık](https://www.investing.com/commodities/london-gas-oil-historical-data), CIF Med gibi
 abonelik gerektirmez.
 
-Eurobob'un ücretsiz günlük kaynağı aranıp bulunamadı: Yahoo Avrupa rafineri ürünü sözleşmelerini
-hiç taşımıyor (`7F` gasoil ve `7H`/`EBB` Eurobob kökleri 404 döner), Argus rakam yayımlamıyor,
-ICE/CME/Barchart sayfaları JavaScript'le yükleniyor. Benzinin otomatik vekili bu yüzden RBOB.
+Eurobob ücretsiz: CME'nin Euro-bob Oxy sözleşmesi Yahoo'da `B7H=F` sürekli sembolüyle geliyor
+(vade sembolleri `B7HV26.NYM` 404 verir, o yüzden yedek tanımlı değil). Kod `7H` veya `EBB` değil,
+**`B7H`**; yanlış kökler 404 döndüğü için bu kaynak bir süre gözden kaçtı.
+
+Gasoil ve HSFO'nun hâlâ ücretsiz günlük kaynağı yok: Yahoo'da yalnız S&P GSCI gasoil *endeksleri*
+var (`^SPGPRGOP` gibi; $/ton fiyat değil seviye) ve `UV=F` boş seri döndürüyor. İkisi de radar
+formundan elle giriliyor. TradingView MCP bu ikisini kapatabilir ama OAuth 2.1 kullandığı ve API
+anahtarı vermediği için headless Actions koşusunda çalışmaz; ayrıca ücretli bir katmanda.
 
 ### Fiyat değişim koridoru (md. 2, 5 ve 6)
 
