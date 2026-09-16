@@ -45,6 +45,11 @@ Disiplin `gazete.py` ile aynı: **şüpheli değeri asla yazma.** `--yaz` kipind
 değerin üzerine yazılmaz, yalnız boş alanlar doldurulur; yazım öncesi ve sonrası `piyasaDogrula`
 çalışır. Kaynak biçim değiştirmişse ayrıştırıcı hata döndürür, dosyaya dokunulmaz.
 
+Künye değerle birlikte gider: var olan bir güne değer eklenirken toplayıcının adı `kaynak`
+alanına, bağlantısı `kaynaklar` listesine eklenir ve `not` alanına hangi alanın hangi kaynaktan
+geldiğini söyleyen bir cümle yazılır. Böylece değer, o günün önceki künyesine sessizce yapışmaz.
+Değerler `BASAMAK` tablosundaki hassasiyete yuvarlanır.
+
 Kaynaklar `KAYNAKLAR` sabitinde sırayla denenir; yenisini eklemek bir satır ve bir ayrıştırıcıdır.
 Doğru sembolü tahmin etmek yerine sordurmak için `--ara <terim>` kipi vardır.
 

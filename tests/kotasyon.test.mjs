@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mbKur, stooqCsv, yahooChart, yahooArama, sec, denetle, vadeSembolleri, ARALIK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
+import { mbKur, stooqCsv, yahooChart, yahooArama, sec, denetle, vadeSembolleri, kayitlariIsle, yuvarla, ARALIK, BASAMAK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
 
 const BUGUN = "2026-09-16";
 
@@ -82,4 +82,48 @@ test("Yahoo sembol araması sonuçları sadeleştirir", () => {
   assert.equal(r.bulunan[1].ad, "Heating Oil Futures");
   assert.match(yahooArama("{}").hata, /quotes/);
   assert.match(yahooArama("bozuk").hata, /ayrıştırılamadı/);
+});
+
+test("var olan güne yazılan değer kendi künyesini de götürür", () => {
+  // Elle girilmiş bir gün: değerleri başka bir kaynaktan, kendi notuyla.
+  const veri = { kayitlar: [{
+    tarih: "2026-09-15", gasoil: 1568.25,
+    kaynak: "TradingView (gecikmeli)",
+    not: "Gasoil ICEEUR:ULS1! gün sonu kapanışı.",
+    kaynaklar: [{ ad: "ICE gün sonu raporu", url: "https://www.ice.com/report/10" }],
+  }] };
+  const degisen = kayitlariIsle(veri, [
+    ["brent", { deger: 108.75, tarih: "2026-09-15", ad: "Yahoo BZ=F", url: "https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF" }],
+    ["gasoil", { deger: 1, tarih: "2026-09-15", ad: "Yahoo X", url: "https://example.com/x" }],
+  ]);
+  const k = veri.kayitlar[0];
+  assert.equal(degisen, 1);
+  assert.equal(k.brent, 108.75);
+  assert.equal(k.gasoil, 1568.25);                       // mevcut değerin üzerine yazılmaz
+  assert.ok(k.kaynak.includes("TradingView"), "önceki künye korunmalı");
+  assert.ok(k.kaynak.includes("Yahoo BZ=F"), "yeni kaynak künyeye eklenmeli");
+  assert.ok(!k.kaynak.includes("Yahoo X"), "yazılmayan alanın kaynağı künyeye girmemeli");
+  assert.deepEqual(k.kaynaklar.map((x) => x.ad), ["ICE gün sonu raporu", "Yahoo BZ=F"]);
+  assert.match(k.not, /Gasoil ICEEUR/);                  // önceki not silinmez
+  assert.match(k.not, /Otomatik toplayıcı: brent \(Yahoo BZ=F\)/);
+});
+
+test("yeni gün açılırken de künye yazılır ve kayıtlar tarihe göre sıralanır", () => {
+  const veri = { kayitlar: [{ tarih: "2026-09-16", kur: 48.646 }] };
+  const degisen = kayitlariIsle(veri, [
+    ["brent", { deger: 108.75, tarih: "2026-09-15", ad: "Yahoo BZ=F", url: "https://y/1" }],
+  ]);
+  assert.equal(degisen, 1);
+  assert.deepEqual(veri.kayitlar.map((k) => k.tarih), ["2026-09-15", "2026-09-16"]);
+  const yeni = veri.kayitlar[0];
+  assert.equal(yeni.kaynak, "Yahoo BZ=F");
+  assert.deepEqual(yeni.kaynaklar, [{ ad: "Yahoo BZ=F", url: "https://y/1" }]);
+  assert.match(yeni.not, /Otomatik toplayıcı/);
+});
+
+test("değerler alanın hassasiyetine yuvarlanır", () => {
+  assert.equal(yuvarla("ho", 5.26200008392334), 5.262);   // Yahoo float32 artığı
+  assert.equal(yuvarla("brent", 108.7500114), 108.75);
+  assert.equal(yuvarla("kur", 48.64600000001), 48.646);
+  for (const alan of Object.keys(ARALIK)) assert.equal(typeof BASAMAK[alan], "number", `${alan} için basamak yok`);
 });

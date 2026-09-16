@@ -16,6 +16,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "../src/piyasa.js";
 
 export const ARALIK = { gasoil: [300, 3000], hsfo: [50, 3000], ho: [0.5, 20], brent: [20, 300], kur: [10, 200] };
+
+// Kaynaklar kayan nokta artığı döndürebiliyor (Yahoo float32: 5.26200008392334). Bu dosya
+// elle de düzenleniyor; değerler alanın gerçek hassasiyetine yuvarlanarak yazılır.
+export const BASAMAK = { gasoil: 2, hsfo: 3, ho: 4, brent: 2, kur: 4 };
+export const yuvarla = (alan, deger) => Number(deger.toFixed(BASAMAK[alan] ?? 4));
+
 export const MAKS_YAS_GUN = 5;
 const ZAMAN_ASIMI_MS = 15000;
 const UA = "kktc-akaryakit/1.0 (+https://github.com/RYucel/kktc-akaryakit)";
@@ -144,6 +150,43 @@ export const KAYNAKLAR = {
 };
 
 /* ---------------------------------------------------------------- */
+/*  Günlüğe yazma — künye değerle birlikte gider                     */
+/* ---------------------------------------------------------------- */
+
+// Var olan bir güne değer eklerken künyeyi de güncellemek şart. Çoğu günün kaydı
+// radar formundan zaten oluşmuş oluyor; künye yazılmazsa toplayıcının değeri o
+// kaydın önceki kaynağına (ör. elle girilmiş TradingView notuna) sessizce yapışır
+// ve uygulamanın günlük tablosu ziyaretçiye yanlış kaynak gösterir.
+export function kunyeEkle(kayit, yazilanlar) {
+  const adlar = [...new Set(yazilanlar.map((x) => x.ad))];
+  const mevcut = (kayit.kaynak || "").split(" + ").map((x) => x.trim()).filter(Boolean);
+  kayit.kaynak = [...mevcut, ...adlar.filter((a) => !mevcut.includes(a))].join(" + ");
+  kayit.kaynaklar = [...(kayit.kaynaklar || []), ...yazilanlar.map((x) => ({ ad: x.ad, url: x.url }))]
+    .filter((x, i, d) => x?.url && d.findIndex((y) => y.url === x.url) === i);
+  const dokum = yazilanlar.map((x) => `${x.alan} (${x.ad})`).join(", ");
+  const cumle = `Otomatik toplayıcı: ${dokum}; kaynağın belirttiği tarihli kapanış.`;
+  kayit.not = kayit.not ? `${kayit.not} ${cumle}` : cumle;
+  return kayit;
+}
+
+// kabul: [alan, {deger, tarih, ad, url}] çiftleri. veri yerinde değiştirilir.
+// Dönüş: yazılan değer sayısı.
+export function kayitlariIsle(veri, kabul) {
+  const yazilan = new Map();
+  for (const [alan, x] of kabul) {
+    let kayit = veri.kayitlar.find((k) => k.tarih === x.tarih);
+    if (!kayit) { kayit = { tarih: x.tarih }; veri.kayitlar.push(kayit); }
+    if (kayit[alan] != null) continue;              // mevcut değerin üzerine yazma
+    kayit[alan] = x.deger;
+    if (!yazilan.has(x.tarih)) yazilan.set(x.tarih, { kayit, alanlar: [] });
+    yazilan.get(x.tarih).alanlar.push({ alan, ad: x.ad, url: x.url });
+  }
+  for (const { kayit, alanlar } of yazilan.values()) kunyeEkle(kayit, alanlar);
+  veri.kayitlar.sort((a, b) => a.tarih.localeCompare(b.tarih));
+  return [...yazilan.values()].reduce((a, x) => a + x.alanlar.length, 0);
+}
+
+/* ---------------------------------------------------------------- */
 
 export function denetle(alan, sonuc, bugun) {
   if (sonuc.hata) return { durum: "hata", neden: sonuc.hata };
@@ -180,6 +223,7 @@ export async function topla(alanlar, bugun) {
       const cevap = await getir(kaynak.url);
       if (cevap.hata) { rapor[alan].push({ ...kaynak, durum: "hata", neden: cevap.hata }); continue; }
       const secilen = sec(kaynak.ayristir(cevap.metin), alan, bugun);
+      if (typeof secilen.deger === "number" && Number.isFinite(secilen.deger)) secilen.deger = yuvarla(alan, secilen.deger);
       rapor[alan].push({ ...kaynak, ...secilen, ...denetle(alan, secilen, bugun) });
     }
   }
@@ -239,16 +283,8 @@ async function main() {
   const yol = new URL("../public/data/piyasa.json", import.meta.url);
   const veri = JSON.parse(await readFile(yol, "utf8"));
   piyasaDogrula(veri, bugun);
-  let degisen = 0;
-  for (const [alan, x] of kabul) {
-    let kayit = veri.kayitlar.find((k) => k.tarih === x.tarih);
-    if (!kayit) { kayit = { tarih: x.tarih, kaynak: x.ad, kaynaklar: [{ ad: x.ad, url: x.url }] }; veri.kayitlar.push(kayit); }
-    if (kayit[alan] != null) continue;              // mevcut değerin üzerine yazma
-    kayit[alan] = x.deger;
-    degisen++;
-  }
+  const degisen = kayitlariIsle(veri, kabul);
   if (!degisen) { console.log("Tüm değerler zaten kayıtlı; dosyaya dokunulmadı."); return; }
-  veri.kayitlar.sort((a, b) => a.tarih.localeCompare(b.tarih));
   piyasaDogrula(veri, bugun);
   await writeFile(yol, `${JSON.stringify(veri, null, 2)}\n`);
   console.log(`${degisen} değer yazıldı.`);
