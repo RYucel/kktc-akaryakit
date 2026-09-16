@@ -70,23 +70,157 @@
   },
   "kayitlar": [
     {
+      "tarih": "2026-08-26",
+      "gasoil": 1239.5,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-08-27",
+      "gasoil": 1221.75,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-08-28",
+      "gasoil": 1280.0,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-08-31",
+      "gasoil": 1347.75,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-01",
+      "gasoil": 1345.25,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-02",
+      "gasoil": 1357.25,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-03",
+      "gasoil": 1349.0,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-04",
+      "gasoil": 1321.5,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-07",
+      "gasoil": 1374.75,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
+      "tarih": "2026-09-08",
+      "gasoil": 1351.75,
+      "kaynak": "Investing.com",
+      "not": "Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
+    },
+    {
       "tarih": "2026-09-09",
       "b95": 1492.6,
       "brent": 101.21,
-      "kaynak": "başlangıç",
+      "kaynak": "başlangıç + Investing.com",
       "tahminiAlanlar": [
         "b95",
         "dz"
       ],
-      "not": "Benzin ve dizel: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı.",
-      "dz": 1351.3
+      "not": "Benzin ve dizel: 11 Eylül fiyatının dayandığı haftalık ortalama (resmi fiyattan geri hesaplandı). Brent: 9 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "dz": 1351.3,
+      "gasoil": 1388.25,
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
     },
     {
       "tarih": "2026-09-10",
       "brent": 108.97,
       "kur": 48.5,
-      "kaynak": "başlangıç",
-      "not": "Brent: 10 Eylül kapanışı."
+      "kaynak": "başlangıç + Investing.com",
+      "not": "Brent: 10 Eylül kapanışı. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
+      "gasoil": 1474.5,
+      "kaynaklar": [
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
+        }
+      ]
     },
     {
       "tarih": "2026-09-11",
@@ -105,26 +239,36 @@
     {
       "tarih": "2026-09-14",
       "kur": 48.5178,
-      "kaynak": "KKTC Merkez Bankası",
-      "not": "14 Eylül 2026 tarihinde geçerli resmî kur, USD Döviz Satış. Aynı güne ait gasoil/Brent seans içi değerleri (1497,25 ve 107,67) gün kapanmadığı için girilmedi.",
+      "kaynak": "KKTC Merkez Bankası + Investing.com",
+      "not": "14 Eylül 2026 tarihinde geçerli resmî kur, USD Döviz Satış. Aynı güne ait gasoil/Brent seans içi değerleri (1497,25 ve 107,67) gün kapanmadığı için girilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
       "kaynaklar": [
         {
           "ad": "Merkez Bankası tarihli kurlar",
           "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        },
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
         }
-      ]
+      ],
+      "gasoil": 1476.5
     },
     {
       "tarih": "2026-09-15",
       "hsfo": 558.236,
-      "kaynak": "TradingView (gecikmeli)",
-      "not": "HSFO NYMEX:UV1! son yayımlanan uzlaşma; bu sözleşme yalnız gün sonu uzlaşması yayımlar, 16 Eylül sabahı itibarıyla en güncel değer 15 Eylül'e ait. Platts resmî değerlendirmesiyle teyit edilmedi.",
+      "kaynak": "TradingView (gecikmeli) + Investing.com",
+      "not": "HSFO NYMEX:UV1! son yayımlanan uzlaşma; bu sözleşme yalnız gün sonu uzlaşması yayımlar, 16 Eylül sabahı itibarıyla en güncel değer 15 Eylül'e ait. Platts resmî değerlendirmesiyle teyit edilmedi. Gasoil: ICE Low Sulphur Gasoil (London Gas Oil, Ekim 2026 vadesi) gün sonu kapanışı, Investing.com tarihsel tablosundan. Borsanın resmî uzlaşmasıyla teyit edilmedi.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
           "url": "https://www.ice.com/report/10"
+        },
+        {
+          "ad": "London Gas Oil tarihli fiyatlar",
+          "url": "https://www.investing.com/commodities/london-gas-oil-historical-data"
         }
-      ]
+      ],
+      "gasoil": 1568.25
     },
     {
       "tarih": "2026-09-16",
