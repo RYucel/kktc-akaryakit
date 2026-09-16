@@ -107,7 +107,23 @@ export function vadeSembolleri(bugun, kok, adet = 3) {
   return cikti;
 }
 
-const yahoo = (sembol) => `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sembol)}?interval=1d&range=15d`;
+const yahoo = (sembol, aralik = "1mo") =>
+  `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sembol)}?interval=1d&range=${aralik}`;
+
+// Sembol kökünü tahmin etmek yerine Yahoo'ya sordurmak için: --ara <terim>
+export const YAHOO_ARA = (terim) =>
+  `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(terim)}&quotesCount=25&newsCount=0`;
+
+export function yahooArama(metin) {
+  let j;
+  try { j = JSON.parse(metin); } catch { return { hata: "JSON ayrıştırılamadı" }; }
+  const q = j?.quotes;
+  if (!Array.isArray(q)) return { hata: "quotes alanı yok" };
+  return { bulunan: q.map((x) => ({
+    sembol: x.symbol, borsa: x.exchange || x.exchDisp || "", tur: x.quoteType || "",
+    ad: x.shortname || x.longname || "",
+  })) };
+}
 
 export const KAYNAKLAR = {
   kur: [
@@ -117,11 +133,11 @@ export const KAYNAKLAR = {
     { ad: "Yahoo BZ=F", url: yahoo("BZ=F"), ayristir: yahooChart },
   ],
   gasoil: [
-    { ad: "Yahoo 7F=F", url: yahoo("7F=F"), ayristir: yahooChart },
+    { ad: "Yahoo 7F=F", url: yahoo("7F=F", "3mo"), ayristir: yahooChart },
     ...vadeSembolleri(kktcBugun(), "7F").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
   ],
   hsfo: [
-    { ad: "Yahoo UV=F", url: yahoo("UV=F"), ayristir: yahooChart },
+    { ad: "Yahoo UV=F", url: yahoo("UV=F", "3mo"), ayristir: yahooChart },
     ...vadeSembolleri(kktcBugun(), "UV").map((s) => ({ ad: `Yahoo ${s}`, url: yahoo(s), ayristir: yahooChart })),
   ],
 };
@@ -184,6 +200,23 @@ function yazdir(rapor) {
 
 async function main() {
   const argv = process.argv.slice(2);
+  const a = argv.indexOf("--ara");
+  if (a >= 0) {
+    const terimler = argv.slice(a + 1).filter((x) => !x.startsWith("--"));
+    if (!terimler.length) { console.error("Kullanım: --ara <terim> [terim...]"); process.exit(2); }
+    for (const terim of terimler) {
+      console.log(`\n"${terim}" için Yahoo sembol araması`);
+      const cevap = await getir(YAHOO_ARA(terim));
+      if (cevap.hata) { console.log(`  ! ${cevap.hata}`); continue; }
+      const r = yahooArama(cevap.metin);
+      if (r.hata) { console.log(`  ! ${r.hata}`); continue; }
+      if (!r.bulunan.length) { console.log("  (sonuç yok)"); continue; }
+      for (const x of r.bulunan) {
+        console.log(`  ${x.sembol.padEnd(16)} ${String(x.borsa).padEnd(8)} ${String(x.tur).padEnd(8)} ${x.ad}`);
+      }
+    }
+    return;
+  }
   const yaz = argv.includes("--yaz");
   const i = argv.indexOf("--alan");
   const alanlar = i >= 0 && argv[i + 1] ? [argv[i + 1]] : Object.keys(KAYNAKLAR);

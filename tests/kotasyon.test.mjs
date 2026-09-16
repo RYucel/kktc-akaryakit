@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mbKur, stooqCsv, yahooChart, sec, denetle, vadeSembolleri, ARALIK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
+import { mbKur, stooqCsv, yahooChart, yahooArama, sec, denetle, vadeSembolleri, ARALIK, KAYNAKLAR } from "../scripts/kotasyon.mjs";
 
 const BUGUN = "2026-09-16";
 
@@ -69,4 +69,17 @@ test("her alan için aralık tanımlı ve kaynak listesi bir dizi", () => {
       assert.equal(typeof k.ayristir, "function");
     }
   }
+});
+
+test("Yahoo sembol araması sonuçları sadeleştirir", () => {
+  const j = JSON.stringify({ quotes: [
+    { symbol: "7FX26.NYM", exchange: "NYM", quoteType: "FUTURE", shortname: "European Low Sulphur Gasoil" },
+    { symbol: "HO=F", exchange: "NYM", quoteType: "FUTURE", longname: "Heating Oil Futures" },
+  ] });
+  const r = yahooArama(j);
+  assert.equal(r.bulunan.length, 2);
+  assert.equal(r.bulunan[0].sembol, "7FX26.NYM");
+  assert.equal(r.bulunan[1].ad, "Heating Oil Futures");
+  assert.match(yahooArama("{}").hata, /quotes/);
+  assert.match(yahooArama("bozuk").hata, /ayrıştırılamadı/);
 });
