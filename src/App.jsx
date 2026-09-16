@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ALANLAR, farkHesapla, turet, gunlukBirlestir } from "./tahmin.js";
+import { ALANLAR, farkHesapla, pencereFarki, turet, gunlukBirlestir } from "./tahmin.js";
 import { SABIT, hesapla, ortukCif } from "./hesap.js";
 import yerlesikVeri from "../public/data/piyasa.json";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "./piyasa.js";
@@ -747,7 +747,7 @@ function aktifPencere(simdi = isodanTarih(bugunIso())) {
 // o da yoksa en yakın önceki kayıttan Brent değişimi.
 
 
-const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", brent: "Brent değişiminden", model: "resmî fiyattan geriye hesapla" };
+const YONTEM_ET = { eurobob: "Eurobob ve Akdeniz farkından", gasoil: "gasoil ve Akdeniz farkından", eurobobPencere: "Eurobob ve resmî pencere farkından", gasoilPencere: "gasoil ve resmî pencere farkından", brent: "Brent değişiminden", model: "resmî fiyattan geriye hesapla" };
 function yontemMetni(yontemler) {
   const say = {};
   for (const y of yontemler) say[y] = (say[y] || 0) + 1;
@@ -854,7 +854,7 @@ function ZamRadari({ nakliye, onIncele }) {
 
   const bugun = bugunIso();
   const pencere = aktifPencere();
-  const turetilmis = useMemo(() => turet(kayitlar), [kayitlar]);
+  const turetilmis = useMemo(() => turet(kayitlar, KARAR.resmiFiyatTarihi), [kayitlar]);
   const gecerli = turetilmis.filter((k) => k.tarih <= bugun); // gelecek tarihli kayıt hesaba girmez
   const penceredeki = gecerli.filter((k) => pencere.isoGunler.includes(k.tarih));
   const girilenGun = penceredeki.filter((k) => (k.b95 != null && !k.tahmini.includes("b95")) || (k.dz != null && !k.tahmini.includes("dz"))).length;
@@ -874,7 +874,7 @@ function ZamRadari({ nakliye, onIncele }) {
       const kurOrt = kurlar.reduce((a, b) => a + b, 0) / kurlar.length;
       const yontemler = icte.filter((k) => k.tahmini.includes(alan)).map((k) => k.yontem[alan]);
       const dogrudan = icte.length - yontemler.length;
-      const kalibre = yontemler.filter((y) => y === "eurobob" || y === "gasoil").length;
+      const kalibre = yontemler.filter((y) => y === "eurobob" || y === "gasoil" || y === "eurobobPencere" || y === "gasoilPencere").length;
       const guven = dogrudan >= 3 ? "yuksek" : dogrudan >= 1 || kalibre >= 2 ? "orta" : "dusuk";
       return { cif: tlOrt / kurOrt, kur: kurOrt, gun: icte.length, yontemler, kaynak: "pencere", guven };
     }
@@ -901,6 +901,9 @@ function ZamRadari({ nakliye, onIncele }) {
   const siraliKayit = useMemo(() => [...kayitlar].sort((a, b) => a.tarih.localeCompare(b.tarih)), [kayitlar]);
   const farkBenzin = farkHesapla(siraliKayit, "b95", "eurobob", bugun);
   const farkDizel = farkHesapla(siraliKayit, "dz", "gasoil", bugun);
+  // Günlük eşleşme yoksa resmî fiyatın dayandığı pencereden kalibrasyon
+  const pencereBenzin = farkBenzin ? null : pencereFarki(siraliKayit, "b95", "eurobob", KARAR.resmiFiyatTarihi);
+  const pencereDizel = farkDizel ? null : pencereFarki(siraliKayit, "dz", "gasoil", KARAR.resmiFiyatTarihi);
   // Tüzük md. 5: pencere, tavanın uygulamaya konulduğu günde başlar; önceki günler sayılmaz.
   const koridorlar = ["b95", "dz"].map((k) => {
     const u = URUNLER[k];
@@ -1068,14 +1071,22 @@ Respond with ONLY this JSON object, no markdown, no commentary:
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
         {[
-          ["Benzin", "Eurobob", farkBenzin, "benzin CIF Med ile Eurobob"],
-          ["Dizel", "gasoil", farkDizel, "dizel CIF Med ile gasoil"],
-        ].map(([ad, vekil, f, cift]) => (
+          ["Benzin", "Eurobob", farkBenzin, pencereBenzin, "benzin CIF Med ile Eurobob"],
+          ["Dizel", "gasoil", farkDizel, pencereDizel, "dizel CIF Med ile gasoil"],
+        ].map(([ad, vekil, f, p, cift]) => (
           <div key={ad} className="rounded-lg px-3 py-2" style={{ background: T.bg, border: `1px solid ${T.cizgi}` }}>
             <span className="font-medium">{ad} için Akdeniz farkı: </span>
             {f
               ? <span>{isaretli(f.fark, 0)} $/t <span style={{ color: T.mute }}>(CIF Med − {vekil}, son {f.gun} günün ortalaması)</span></span>
-              : <span style={{ color: T.mute }}>henüz hesaplanamadı. Aynı gün için hem {cift} değerini gir.</span>}
+              : p
+                ? <span>{isaretli(p.fark, 0)} $/t <span style={{ color: T.mute }}>
+                    (resmî pencereden: {trTarih(isodanTarih(p.bas))} – {trTarih(isodanTarih(p.son))}; CIF Med {p.hedefGun} gün, {vekil} {p.vekilGun} gün).
+                    Günlük eşleşme daha güvenilir: aynı gün için hem {cift} değerini gir.
+                  </span></span>
+                : <span style={{ color: T.mute }}>
+                    henüz hesaplanamadı. Aynı gün için hem {cift} değerini gir; ya da {trTarih(isodanTarih(KARAR.resmiFiyatTarihi))} öncesindeki
+                    fiyatlama penceresine {vekil} değerlerini ekle, fark resmî fiyattan kalibre edilsin.
+                  </span>}
           </div>
         ))}
       </div>

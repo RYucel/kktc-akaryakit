@@ -96,6 +96,30 @@ Hesap modelinin oranları **2001 Petrol Ürünlerinin Fiyatlandırma Esasların�
   ortalamasına bakar; uygulamadaki tahmin penceresi haftalık (Cuma–Perşembe) fiyatlama
   ritmini izler. İkisi farklı şeydir; koridor göstergesi md. 5'i ayrıca hesaplar.
 
+### Akdeniz farkının iki kalibrasyon yolu
+
+CIF Med kotasyonları abonelik ürünüdür; çoğu gün elde olmaz. Model bu yüzden vekil seri
+kullanır (benzinde Eurobob, dizelde gasoil) ve aradaki **Akdeniz farkı**nı kalibre etmeye
+çalışır. İki yol var, bu sırayla denenir:
+
+1. **Günlük eşleşme** — aynı güne hem CIF Med hem vekil girilmişse son 5 çiftin ortalama farkı.
+   En güvenilir yol.
+2. **Resmî pencere** — eşleşme yoksa: resmî fiyattan geriye hesaplanan CIF (`ortukCif`) ile,
+   o fiyatın yürürlük tarihinden geriye 15 günlük penceredeki vekil ortalamasının farkı.
+   Günlük eşleşme gerekmez; iki seri aynı pencerede ayrı ayrı bilinse yeter. Kaynağı Resmî
+   Gazete olduğu için aboneliğe ihtiyaç duymaz.
+
+İkisi de yoksa tahmin **Brent değişimine** düşer. Bu son çare kötüdür: distile ürünlerin ham
+petrolden koptuğu dönemlerde (2026 Eylül'ünde gasoil üç ayda %61, Brent %28 arttı) Brent vekili
+CIF'i yüzlerce dolar düşük tahmin eder, zam radarı ve koridor göstergesi olduğundan zayıf okur.
+Kartlarda kaç günün hangi yöntemle türetildiği yazar; "Brent değişiminden" ibaresini gördüğünde
+sayılara temkinli yaklaş.
+
+**Pencere kalibrasyonunu açmak için** resmî fiyatın yürürlük tarihinden önceki 15 güne birkaç
+gün vekil değeri (gasoil / Eurobob) gir. Bu seriler
+[herkese açık](https://www.investing.com/commodities/london-gas-oil-historical-data), CIF Med
+gibi abonelik gerektirmez. Hedef tarafta zaten resmî fiyattan türetilmiş CIF duruyor.
+
 ### Fiyat değişim koridoru (md. 2, 5 ve 6)
 
 Tüzük zam tetikleyicisini sayısal olarak tanımlar:
