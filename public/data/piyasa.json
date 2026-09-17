@@ -6,57 +6,57 @@
     "nakliye": 0.064
   },
   "guncelFiyatlar": {
-    "tarih": "2026-09-11",
+    "tarih": "2026-09-17",
     "urunler": {
       "b95": {
-        "resmiPompa": 71.12,
-        "resmiIAF": 60.271186
+        "resmiPompa": 77.12,
+        "resmiIAF": 65.355932
       },
       "b98": {
-        "resmiPompa": 72.12,
-        "resmiIAF": 61.118644
+        "resmiPompa": 78.12,
+        "resmiIAF": 66.20339
       },
       "dz": {
-        "resmiPompa": 70,
-        "resmiIAF": 59.322034
+        "resmiPompa": 76,
+        "resmiIAF": 64.40678
       }
     },
     "kaynak": {
-      "url": "https://basimevi.gov.ct.tr/Portals/6/2026/169.pdf?ver=2026-08-13-153118-770",
-      "yayinTarihi": "2026-09-10",
-      "gazeteNo": 169,
+      "url": "https://basimevi.gov.ct.tr/Portals/6/2026/177.pdf?ver=2026-08-13-153118-770",
+      "yayinTarihi": "2026-09-16",
+      "gazeteNo": 177,
       "ad": "KKTC Resmî Gazete",
-      "sayfa": 35
+      "sayfa": 109
     },
     "yontem": "otomatik",
-    "kontrolZamani": "2026-09-15T11:41:16.578Z"
+    "kontrolZamani": "2026-09-17T05:11:19.751Z"
   },
   "karar": {
-    "kaynakGazete": "10 Eylül 2026 tarihli Resmi Gazete (Sayı 169)",
-    "resmiFiyatTarihi": "2026-09-11",
-    "harcMuafiyetiSonGun": "2026-09-16",
-    "paketBitis": "2026-09-17",
-    "veriGuncelleme": "2026-09-11"
+    "kaynakGazete": "16 Eylül 2026 tarihli Resmi Gazete (Sayı 177)",
+    "resmiFiyatTarihi": "2026-09-17",
+    "harcMuafiyetiSonGun": "2026-09-23",
+    "paketBitis": "2026-09-24",
+    "veriGuncelleme": "2026-09-17"
   },
   "urunler": {
     "b95": {
-      "resmiIAF": 60.271186,
-      "resmiPompa": 71.12,
-      "resmiFif": 0.176095
+      "resmiIAF": 65.355932,
+      "resmiPompa": 77.12,
+      "resmiFif": 0.391829
     },
     "b98": {
-      "resmiIAF": 61.118644,
-      "resmiPompa": 72.12,
-      "resmiFif": 0.048643
+      "resmiIAF": 66.20339,
+      "resmiPompa": 78.12,
+      "resmiFif": 0.260603
     },
     "dz": {
-      "resmiIAF": 59.322034,
-      "resmiPompa": 70,
+      "resmiIAF": 64.40678,
+      "resmiPompa": 76.0,
       "resmiFif": 0
     }
   },
   "bugunkuKurallar": {
-    "aciklama": "Devlet neredeyse hiçbir şey almıyor: harçlar, turizm fonu ve KDV bu hafta askıda.",
+    "aciklama": "Devlet neredeyse hiçbir şey almıyor: gümrük ve rıhtım harcı 23 Eylül'e, KDV ve turizm fonu 24 Eylül'e kadar askıda.",
     "ayar": {
       "tampon": true,
       "rihtim": false,

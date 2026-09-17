@@ -15,6 +15,9 @@ from zoneinfo import ZoneInfo
 from pypdf import PdfReader
 
 INDEX = "https://basimevi.gov.ct.tr/"
+# Gazete PDF'leri büyüyor: 2026 Eylül'ünde RG 177 49,7 MB idi ve 40 MB'lık eski sınır
+# fiyat güncellemesini düşürdü. Sınır kötü niyetli/bozuk yanıta karşı hâlâ gerekli.
+MAX_BYTES = 128 * 1024 * 1024
 
 
 def normalize(text):
@@ -79,7 +82,10 @@ def parse_page(text, source, page_number):
     # Read only the table, never the repealed ordinance or prices elsewhere in the PDF.
     table = re.split(r"Cetvel", text, flags=re.I)[-1]
     table = re.split(r"Yürürlükten", table, flags=re.I)[0]
-    number = r"(\d+[,.]\s*\d+)\s*-?\s*TL\s*\.?\s*/\s*Lt\.?\s*,?"
+    # Birim, metin çıkarımında harfleri boşlukla ayrılmış gelebiliyor: RG 177'de 95 oktanın
+    # perakende fiyatı "77, 12TL./L t.," olarak çıktı ve "Lt" bekleyen desen tutmadı.
+    # Sayının kendisi gevşetilmedi: yalnız birim harfleri arasında boşluğa izin verilir.
+    number = r"(\d+[,.]\s*\d+)\s*-?\s*T\s*L\s*\.?\s*/\s*L\s*t\s*\.?\s*,?"
     products = {}
     for key, label in [("b95", r"95\s*Oktan"), ("b98", r"98\s*Oktan"), ("dz", r"Euro\s*Diesel")]:
         matches = re.findall(label + r"\s*" + number + r"\s*" + number, table, re.I)
@@ -122,9 +128,9 @@ def download(url):
             with urlopen(Request(url, headers={"User-Agent": "KKTC-Akaryakit/1.0 (public price checker)"}), timeout=60) as response:
                 if urlparse(response.url).hostname != "basimevi.gov.ct.tr":
                     raise ValueError("Beklenmeyen kaynak yönlendirmesi.")
-                data = response.read(40 * 1024 * 1024 + 1)
-                if len(data) > 40 * 1024 * 1024:
-                    raise ValueError("Kaynak dosya 40 MB sınırını aşıyor.")
+                data = response.read(MAX_BYTES + 1)
+                if len(data) > MAX_BYTES:
+                    raise ValueError(f"Kaynak dosya {MAX_BYTES // 1024 // 1024} MB sınırını aşıyor.")
                 return data
         except (OSError, TimeoutError):
             if attempt == 2:

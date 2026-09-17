@@ -6,6 +6,8 @@ from scripts.gazete import discover, parse_page, latest
 
 SOURCE = {"url": "https://basimevi.gov.ct.tr/Portals/6/2026/169.pdf", "yayinTarihi": "2026-09-10", "gazeteNo": 169}
 TEXT = (Path(__file__).parent / "fixtures/rg-169-price.txt").read_text(encoding="utf-8")
+SOURCE_177 = {"url": "https://basimevi.gov.ct.tr/Portals/6/2026/177.pdf", "yayinTarihi": "2026-09-16", "gazeteNo": 177}
+TEXT_177 = (Path(__file__).parent / "fixtures/rg-177-price.txt").read_text(encoding="utf-8")
 
 
 class GazetteTests(unittest.TestCase):
@@ -15,6 +17,21 @@ class GazetteTests(unittest.TestCase):
         self.assertEqual([price["urunler"][key]["resmiPompa"] for key in ["b95", "b98", "dz"]], [71.12, 72.12, 70.0])
         self.assertEqual(price["urunler"]["dz"]["resmiIAF"], 59.322034)
         self.assertEqual(price["kaynak"]["sayfa"], 35)
+
+    def test_unit_letters_may_be_split_by_extraction_spaces(self):
+        # RG 177'de 95 oktanın perakende fiyatı "77, 12TL./L t.," olarak çıkıyor: hem sayının
+        # içinde hem "Lt" biriminin içinde boşluk var. Eski desen "Lt" beklediği için tutmuyordu.
+        self.assertIn("TL./L t.", " ".join(TEXT_177.split()))
+        price = parse_page(TEXT_177, SOURCE_177, 109)
+        self.assertEqual(price["tarih"], "2026-09-17")
+        self.assertEqual([price["urunler"][key]["resmiPompa"] for key in ["b95", "b98", "dz"]], [77.12, 78.12, 76.0])
+        self.assertEqual(price["urunler"]["b95"]["resmiIAF"], 65.355932)
+
+    def test_gazette_larger_than_the_old_limit_is_still_bounded(self):
+        # RG 177 49,7 MB idi ve 40 MB'lık sınır güncellemeyi düşürdü. Sınır yükseldi ama durmalı.
+        from scripts.gazete import MAX_BYTES
+        self.assertGreater(MAX_BYTES, 50 * 1024 * 1024)
+        self.assertLessEqual(MAX_BYTES, 256 * 1024 * 1024)
 
     def test_missing_or_ambiguous_product_fails(self):
         for text in [TEXT.replace("70,00", "?"), TEXT.replace("Euro Diesel 59,322034", "Unknown 59,322034"), TEXT.replace("70,00", "-70,00")]:
