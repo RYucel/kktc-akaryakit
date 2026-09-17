@@ -51,7 +51,7 @@
     },
     "dz": {
       "resmiIAF": 64.40678,
-      "resmiPompa": 76.0,
+      "resmiPompa": 76,
       "resmiFif": 0
     }
   },
@@ -730,7 +730,7 @@
       "brent": 108.09,
       "kur": 48.646,
       "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Benzin ve dizel CIF Med: 17 Eylül 2026 resmî fiyatının (RG 177) dayandığı 11-16 Eylül penceresinin ortalaması, resmî fiyattan geri hesaplandı. Günlük bir kotasyon değildir; kalibrasyonda yalnız pencere farkı için kullanılır.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
@@ -750,7 +750,13 @@
         }
       ],
       "ho": 4.9881,
-      "rb": 3.2317
+      "rb": 3.2317,
+      "b95": 1613.7,
+      "dz": 1467.3,
+      "tahminiAlanlar": [
+        "b95",
+        "dz"
+      ]
     },
     {
       "tarih": "2026-09-17",

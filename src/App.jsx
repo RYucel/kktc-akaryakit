@@ -3,6 +3,7 @@ import { ALANLAR, farkHesapla, pencereFarki, turet, gunlukBirlestir } from "./ta
 import { SABIT, hesapla, ortukCif } from "./hesap.js";
 import yerlesikVeri from "../public/data/piyasa.json";
 import { piyasaDogrula, kktcBugun, tarihGecerli } from "./piyasa.js";
+import { fiyatiUretenPencere, tahminPenceresi } from "./pencere.js";
 import { PIYASA_KAYNAKLARI } from "./piyasaKaynaklari.js";
 import { koridorDurumu, PENCERE_GUN } from "./koridor.js";
 import {
@@ -728,15 +729,6 @@ const trTarihYil = (iso) => isodanTarih(iso).toLocaleDateString("tr-TR", { day: 
 function gunFarki(a, b) { return Math.round((isodanTarih(a) - isodanTarih(b)) / 86400000); }
 
 // Tüzük geçici maddesi: Cuma'dan sonraki Çarşamba'ya kadar olan iş günlerinin ortalaması
-function aktifPencere(simdi = isodanTarih(bugunIso())) {
-  const d = new Date(simdi.getFullYear(), simdi.getMonth(), simdi.getDate());
-  const cumadanBeri = (d.getDay() - 5 + 7) % 7;
-  const bas = new Date(d); bas.setDate(d.getDate() - cumadanBeri);
-  const gunler = [0, 3, 4, 5].map((ek) => { const x = new Date(bas); x.setDate(bas.getDate() + ek); return x; });
-  const son = gunler[3];
-  const aciklama = new Date(son); aciklama.setDate(son.getDate() + 1);
-  return { bas, son, aciklama, gunler, isoGunler: gunler.map(isoGun), kapandi: d.getDay() === 4 };
-}
 
 // Vekil ile CIF Med arasındaki farkı, ikisinin de girildiği son günlerden hesapla.
 // Önce hedef tarihten önceki/aynı günler kullanılır; hiç yoksa elde olan tüm çiftler.
@@ -824,6 +816,9 @@ const depo = {
 
 const BOS_FORM = { tarih: "", b95: "", dz: "", eurobob: "", gasoil: "", hsfo: "", ho: "", rb: "", brent: "", kur: "", not: "" };
 const ESKI_VERI_GUN = 10;
+// Pencerede en az bu kadar gün olmadan tahmin gösterilmez. Dört iş gününün biri tek başına
+// haftayı temsil etmez; yeni pencere açıldığında kart sayı yerine veri yetersizliğini söyler.
+const MIN_TAHMIN_GUN = 2;
 
 function ZamRadari({ nakliye, onIncele }) {
   const [yerel, setYerel] = useState([]);
@@ -853,15 +848,12 @@ function ZamRadari({ nakliye, onIncele }) {
   }
 
   const bugun = bugunIso();
-  const pencere = aktifPencere();
-  // Resmî fiyatı üreten fiyatlama penceresi: yürürlük tarihinden bir hafta öncesinin penceresi.
   // Çapa CIF (resmî fiyattan geri hesaplanan) bu günlerin ortalamasıdır; kalibrasyonda vekil
   // ortalaması da aynı günlerden alınmalı, yoksa yükselen piyasada fark sistematik sapar.
-  const fiyatPenceresi = useMemo(() => {
-    const d = isodanTarih(KARAR.resmiFiyatTarihi);
-    d.setDate(d.getDate() - 7);
-    return { gunler: aktifPencere(d).isoGunler };
-  }, []);
+  const fiyatPenceresi = useMemo(() => ({ gunler: fiyatiUretenPencere(KARAR.resmiFiyatTarihi).isoGunler }), []);
+  // Yeni fiyat yürürlüğe girdiği gün, içinde bulunduğumuz pencere onu üreten penceredir:
+  // cevabı bellidir, yeniden tahmin edilmez; bir sonrakine geçilir (bkz. pencere.js).
+  const pencere = useMemo(() => tahminPenceresi(KARAR.resmiFiyatTarihi, isodanTarih(bugunIso())), []);
   const turetilmis = useMemo(() => turet(kayitlar, fiyatPenceresi), [kayitlar, fiyatPenceresi]);
   const gecerli = turetilmis.filter((k) => k.tarih <= bugun); // gelecek tarihli kayıt hesaba girmez
   const penceredeki = gecerli.filter((k) => pencere.isoGunler.includes(k.tarih));
@@ -876,6 +868,9 @@ function ZamRadari({ nakliye, onIncele }) {
   // Tüzük: her günün CIF'i kendi günkü kurla TL'ye çevrilir, sonra ortalama alınır.
   function tahmin(alan, ekPrim = 0) {
     const icte = penceredeki.filter((k) => k[alan] != null);
+    // Pencere yeni açıldığında bir iki gün tüm haftayı temsil etmez. Eski bir değere düşüp
+    // sayı göstermektense veri yetersizliğini söylemek doğru: kullanıcı neyi beklediğini bilir.
+    if (icte.length && icte.length < MIN_TAHMIN_GUN) return { az: true, gun: icte.length };
     if (icte.length) {
       const kurlar = icte.map((k) => gununKuru(k.tarih));
       const tlOrt = icte.reduce((a, k, i) => a + (k[alan] + ekPrim) * kurlar[i], 0) / icte.length;
@@ -886,12 +881,9 @@ function ZamRadari({ nakliye, onIncele }) {
       const guven = dogrudan >= 3 ? "yuksek" : dogrudan >= 1 || kalibre >= 2 ? "orta" : "dusuk";
       return { cif: tlOrt / kurOrt, kur: kurOrt, gun: icte.length, yontemler, kaynak: "pencere", guven };
     }
-    const son = [...gecerli].reverse().find((k) => k[alan] != null);
-    if (!son) return null;
-    return {
-      cif: son[alan] + ekPrim, kur: gununKuru(son.tarih), gun: 0, yontemler: son.tahmini.includes(alan) ? [son.yontem[alan]] : [],
-      kaynak: "son", tarih: son.tarih, guven: "dusuk", eski: gunFarki(bugun, son.tarih) > ESKI_VERI_GUN,
-    };
+    // Pencerede hiç gün yoksa eski bir kapanışa düşmek yanıltıcı olur: o değer çoktan
+    // tüketilmiş bir pencereye ait olabilir ve resmî fiyata dönüşmüş olabilir.
+    return { az: true, gun: 0 };
   }
 
   const kartlar = [
@@ -899,7 +891,7 @@ function ZamRadari({ nakliye, onIncele }) {
     { k: "b98", t: tahmin("b95", prim98()) },
     { k: "dz", t: tahmin("dz") },
   ].map((x) => {
-    if (!x.t || x.t.eski) return { ...x, yok: true };
+    if (!x.t || x.t.eski || x.t.az) return { ...x, yok: true, az: x.t?.az, gun: x.t?.gun };
     const u = URUNLER[x.k];
     const p = hesapla(u, x.t.cif, x.t.kur, KURALLAR.bugun.ayar, nakliye).pompa;
     const pm = hesapla(u, x.t.cif, x.t.kur, KURALLAR.muafiyetBiter.ayar, nakliye).pompa;
@@ -1041,7 +1033,11 @@ Respond with ONLY this JSON object, no markdown, no commentary:
               <div key={x.k} className="rounded-xl p-4" style={{ background: T.bg, border: `1px solid ${T.cizgi}` }}>
                 <div className="font-semibold">{u.ad}</div>
                 <p className="mt-2 text-sm" style={{ color: T.mute }}>
-                  {x.t?.eski ? `Son değer ${ESKI_VERI_GUN} günden eski olduğu için tahmin gösterilmiyor. Güncel bir değer ekle.` : "Tahmin için veri yok. Bir değer ekle."}
+                  {x.t?.eski
+                    ? `Son değer ${ESKI_VERI_GUN} günden eski olduğu için tahmin gösterilmiyor. Güncel bir değer ekle.`
+                    : x.az
+                      ? `Tahmin için yeterli veri yok: yeni fiyatlama penceresinin ${pencere.isoGunler.length} iş gününden ${x.gun} tanesi girildi. En az ${MIN_TAHMIN_GUN} gün gerekiyor.`
+                      : "Tahmin için veri yok. Bir değer ekle."}
                 </p>
               </div>
             );

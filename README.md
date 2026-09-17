@@ -178,10 +178,15 @@ Farkın kendisi iki yoldan kalibre edilir, bu sırayla:
    bir kotasyon değil, fiyatlama penceresinin ortalamasıdır; günlük bir vekil kapanışıyla
    eşleştirmek elma-armut karşılaştırmasıdır.
 2. **Resmî pencere** — eşleşme yoksa: resmî fiyattan geriye hesaplanan CIF ile, **o fiyatı üreten
-   fiyatlama penceresindeki** vekil ortalamasının farkı. Pencere, yürürlük tarihinden bir hafta
-   öncesinin Cuma–Çarşamba aralığıdır — yani çapanın kendisinin ortalandığı günler. Günlük
+   fiyatlama penceresindeki** vekil ortalamasının farkı. Pencere, yürürlük tarihinden **bir gün**
+   önce kapanan Cuma–Çarşamba aralığıdır — yani çapanın kendisinin ortalandığı günler. Günlük
    eşleşme gerekmez; iki seri aynı pencerede ayrı ayrı bilinse yeter. Kaynağı Resmî Gazete
    olduğu için aboneliğe ihtiyaç duymaz.
+
+   Bir gün geri saymak önemlidir. Önceden bir hafta geri sayılıyordu; bu, fiyatın hep **Cuma**
+   yürürlüğe girdiğini varsayar. 17 Eylül 2026 emirnamesi **Perşembe** yürürlüğe girdi ve
+   kalibrasyon bir hafta geriye, 4–9 Eylül'e kaydı: benzinde gerçek fark +343 \$/t iken
+   +289 \$/t kullanıldı ve radar zammın ertesi günü "indirim bekleniyor" dedi.
 
    Pencere uzunluğu önemlidir. Yükselen piyasada uzun pencere ucuz günleri içine alır ve farkı
    sistematik olarak yukarı iter: Eylül 2026'da 15 takvim günü +4,78 \$/t verirken, fiyatı üreten
@@ -207,6 +212,17 @@ Gasoil ve HSFO'nun hâlâ ücretsiz günlük kaynağı yok: Yahoo'da yalnız S&P
 var (`^SPGPRGOP` gibi; $/ton fiyat değil seviye) ve `UV=F` boş seri döndürüyor. İkisi de radar
 formundan elle giriliyor. TradingView MCP bu ikisini kapatabilir ama OAuth 2.1 kullandığı ve API
 anahtarı vermediği için headless Actions koşusunda çalışmaz; ayrıca ücretli bir katmanda.
+
+### Tahmin hangi pencereyi kullanır
+
+Yeni fiyat yürürlüğe girdiği gün, içinde bulunulan Cuma–Çarşamba penceresi o fiyatı **üreten**
+penceredir: cevabı bellidir (yeni resmî fiyat), yeniden tahmin edilmesi anlamsızdır. Radar böyle
+bir günde bir sonraki pencereye geçer. Pencerede `MIN_TAHMIN_GUN`'den az gün varsa kart sayı
+göstermez, "tahmin için yeterli veri yok" der — bir iki gün dört iş gününü temsil etmez ve eski
+bir kapanışa düşmek çoktan tüketilmiş bir pencerenin değerini gelecek tahmini gibi gösterirdi.
+
+Takvim mantığı `src/pencere.js` içinde ve `tests/pencere.test.mjs` ile sınanır; hatanın saklandığı
+yer tam olarak "fiyat Cuma dışında bir gün yürürlüğe girerse" durumuydu.
 
 ### Fiyat değişim koridoru (md. 2, 5 ve 6)
 
