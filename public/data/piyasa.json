@@ -729,8 +729,8 @@
       "gasoil": 1549,
       "brent": 108.09,
       "kur": 48.646,
-      "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası + Yahoo HO=F + Yahoo RB=F",
-      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Benzin ve dizel CIF Med: 17 Eylül 2026 resmî fiyatının (RG 177) dayandığı 11-16 Eylül penceresinin ortalaması, resmî fiyattan geri hesaplandı. Günlük bir kotasyon değildir; kalibrasyonda yalnız pencere farkı için kullanılır.",
+      "kaynak": "TradingView (gecikmeli) + KKTC Merkez Bankası + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
+      "not": "Gasoil ICEEUR:ULS1! ve Brent ICEEUR:BRN1! 16 Eylül 05:30 UTC seans içi, 10 dk gecikmeli; gün kapanışı değil. Kur: Merkez Bankası 16 Eylül USD Döviz Satış. Otomatik toplayıcı: ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Benzin ve dizel CIF Med: 17 Eylül 2026 resmî fiyatının (RG 177) dayandığı 11-16 Eylül penceresinin ortalaması, resmî fiyattan geri hesaplandı. Günlük bir kotasyon değildir; kalibrasyonda yalnız pencere farkı için kullanılır. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "kaynaklar": [
         {
           "ad": "ICE gün sonu raporu",
@@ -747,6 +747,10 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
       "ho": 4.9881,
@@ -756,7 +760,8 @@
       "tahminiAlanlar": [
         "b95",
         "dz"
-      ]
+      ],
+      "eurobob": 1272.95
     },
     {
       "tarih": "2026-09-17",
