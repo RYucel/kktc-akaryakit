@@ -798,7 +798,7 @@
     {
       "tarih": "2026-09-18",
       "kur": 48.6749,
-      "kaynak": "KKTC Merkez Bankası + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F",
+      "kaynak": "KKTC Merkez Bankası + Yahoo BZ=F + Yahoo HO=F + Yahoo RB=F + Yahoo B7H=F",
       "kaynaklar": [
         {
           "ad": "KKTC Merkez Bankası",
@@ -815,15 +815,32 @@
         {
           "ad": "Yahoo RB=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo B7H=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/B7H%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
+      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: brent (Yahoo BZ=F), ho (Yahoo HO=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F); kaynağın belirttiği tarihli kapanış.",
       "brent": 98.77,
       "ho": 4.8367,
-      "rb": 3.242
+      "rb": 3.242,
+      "eurobob": 1274.98
     },
     {
       "tarih": "2026-09-19",
+      "kur": 48.6992,
+      "kaynak": "KKTC Merkez Bankası",
+      "kaynaklar": [
+        {
+          "ad": "KKTC Merkez Bankası",
+          "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        }
+      ],
+      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış."
+    },
+    {
+      "tarih": "2026-09-21",
       "kur": 48.6992,
       "kaynak": "KKTC Merkez Bankası",
       "kaynaklar": [
