@@ -1110,7 +1110,7 @@
     {
       "tarih": "2026-10-01",
       "kur": 49.0184,
-      "kaynak": "KKTC Merkez Bankası + Yahoo B7H=F + Yahoo HO=F",
+      "kaynak": "KKTC Merkez Bankası + Yahoo B7H=F + Yahoo HO=F + Yahoo BZ=F + Yahoo RB=F",
       "kaynaklar": [
         {
           "ad": "KKTC Merkez Bankası",
@@ -1123,11 +1123,21 @@
         {
           "ad": "Yahoo HO=F",
           "url": "https://query1.finance.yahoo.com/v8/finance/chart/HO%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo BZ=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/BZ%3DF?interval=1d&range=1mo"
+        },
+        {
+          "ad": "Yahoo RB=F",
+          "url": "https://query1.finance.yahoo.com/v8/finance/chart/RB%3DF?interval=1d&range=1mo"
         }
       ],
-      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F), ho (Yahoo HO=F); kaynağın belirttiği tarihli kapanış.",
+      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: eurobob (Yahoo B7H=F), ho (Yahoo HO=F); kaynağın belirttiği tarihli kapanış. Otomatik toplayıcı: brent (Yahoo BZ=F), rb (Yahoo RB=F); kaynağın belirttiği tarihli kapanış.",
       "eurobob": 1209.06,
-      "ho": 4.642
+      "ho": 4.642,
+      "brent": 102.31,
+      "rb": 3.4026
     },
     {
       "tarih": "2026-10-02",
