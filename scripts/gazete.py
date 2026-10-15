@@ -5,9 +5,11 @@ from html.parser import HTMLParser
 from io import BytesIO
 import json
 import re
+import ssl
 import sys
 import time
 import unicodedata
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
@@ -17,6 +19,10 @@ from pypdf import PdfReader
 INDEX = "https://basimevi.gov.ct.tr/"
 # Gazete PDF'leri büyüyor: 2026 Eylül'ünde RG 177 49,7 MB idi ve 40 MB'lık eski sınır
 # fiyat güncellemesini düşürdü. Sınır kötü niyetli/bozuk yanıta karşı hâlâ gerekli.
+# basimevi.gov.ct.tr yalnız yaprak sertifikayı gönderiyor, ara sertifikayı (Let's Encrypt YR1)
+# göndermiyor; GitHub runner'ında "unable to get local issuer certificate" hatası buradan geldi.
+# Ara sertifika ve Root YR yalnız bu bağlamda eklenir; doğrulama kapatılmaz.
+CHAIN = Path(__file__).with_name("letsencrypt-chain.pem")
 MAX_BYTES = 128 * 1024 * 1024
 
 
@@ -119,13 +125,19 @@ def parse_pdf(content, source):
     return found[0]
 
 
+def tls_context():
+    context = ssl.create_default_context()
+    context.load_verify_locations(cafile=str(CHAIN))
+    return context
+
+
 def download(url):
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname != "basimevi.gov.ct.tr":
         raise ValueError("Yalnız KKTC Resmî Gazete kaynağına izin verilir.")
     for attempt in range(3):
         try:
-            with urlopen(Request(url, headers={"User-Agent": "KKTC-Akaryakit/1.0 (public price checker)"}), timeout=60) as response:
+            with urlopen(Request(url, headers={"User-Agent": "KKTC-Akaryakit/1.0 (public price checker)"}), timeout=60, context=tls_context()) as response:
                 if urlparse(response.url).hostname != "basimevi.gov.ct.tr":
                     raise ValueError("Beklenmeyen kaynak yönlendirmesi.")
                 data = response.read(MAX_BYTES + 1)
