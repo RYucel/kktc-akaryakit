@@ -1602,6 +1602,18 @@
         }
       ],
       "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış."
+    },
+    {
+      "tarih": "2026-10-22",
+      "kur": 49.6015,
+      "kaynak": "KKTC Merkez Bankası",
+      "kaynaklar": [
+        {
+          "ad": "KKTC Merkez Bankası",
+          "url": "https://www.kktcmerkezbankasi.org/tr/veriler/doviz_kurlari/kur_sorgulama"
+        }
+      ],
+      "not": "Otomatik toplayıcı: kur (KKTC Merkez Bankası); kaynağın belirttiği tarihli kapanış."
     }
   ]
 }
